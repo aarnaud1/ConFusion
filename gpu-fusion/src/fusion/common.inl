@@ -17,11 +17,22 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cuda.h>
+#include "attributes.hpp"
+#include "math/geometry.hpp"
 
-static inline void exitError(const char *msg = "")
+namespace fusion
 {
-    fprintf(stderr, "Error : %s\n", msg);
-    exit(EXIT_FAILURE);
+__global__ static void transformPointsKernel(
+    math::Vec3f* __restrict__ points,
+    math::Vec3f* __restrict__ normals,
+    const math::Mat4d& m,
+    const size_t n)
+{
+    for(size_t idx = blockIdx.x * blockDim.x + threadIdx.x; idx < n; idx += blockDim.x * gridDim.x)
+    {
+        points[idx] = m * math::Vec4d(points[idx], 1.0);
+        normals[idx] = m.GetRotation() * math::Vec3d(normals[idx]);
+    }
 }
+} // namespace fusion

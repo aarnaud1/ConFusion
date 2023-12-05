@@ -17,11 +17,18 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <math/geometry.hpp>
 
-static inline void exitError(const char *msg = "")
+namespace fusion
 {
-    fprintf(stderr, "Error : %s\n", msg);
-    exit(EXIT_FAILURE);
-}
+struct FusionParameters
+{
+    float voxelRes;
+    float tau;
+    float near;
+    float far;
+    size_t maxWidth;
+    size_t maxHeight;
+    math::Mat3d intrinsics;
+};
+} // namespace fusion

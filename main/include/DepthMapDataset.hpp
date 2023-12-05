@@ -19,54 +19,54 @@
 
 #include <vector>
 #include <memory>
-#include <geometry/geometry.hpp>
+#include <math/geometry.hpp>
 
 namespace tests
 {
 struct FrameInfo
 {
-  FrameInfo(const size_t w, const size_t h) : width{w}, height{h} {}
-  size_t width;
-  size_t height;
+    FrameInfo(const size_t w, const size_t h) : width{w}, height{h} {}
+    size_t width;
+    size_t height;
 };
 
 class DepthMapDataset
 {
-public:
-  DepthMapDataset(const std::string& dir, const size_t n = 0);
+  public:
+    DepthMapDataset(const std::string& dir, const size_t n = 0);
 
-  auto size() const { return size_; }
+    auto size() const { return size_; }
 
-  auto& intrinsics() { return intrinsics_; }
-  const auto& intrinsics() const { return intrinsics_; }
+    auto& intrinsics() { return intrinsics_; }
+    const auto& intrinsics() const { return intrinsics_; }
 
-  auto& poses() { return poses_; }
-  const auto& poses() const { return poses_; }
+    auto& poses() { return poses_; }
+    const auto& poses() const { return poses_; }
 
-  auto& depthImages() { return depthImages_; }
-  const auto& depthImages() const { return depthImages_; }
+    auto& depthImages() { return depthImages_; }
+    const auto& depthImages() const { return depthImages_; }
 
-  auto& colorImages() { return colorImages_; }
-  const auto& colorImages() const { return colorImages_; }
+    auto& colorImages() { return colorImages_; }
+    const auto& colorImages() const { return colorImages_; }
 
-  auto& getDepthInfo() { return depthFramesInfo_; }
-  const auto& getDepthInfo() const { return depthFramesInfo_; }
+    auto& getDepthInfo() { return depthFramesInfo_; }
+    const auto& getDepthInfo() const { return depthFramesInfo_; }
 
-  auto& getColorInfo() { return colorFramesInfo_; }
-  const auto& getColorInfo() const { return colorFramesInfo_; }
+    auto& getColorInfo() { return colorFramesInfo_; }
+    const auto& getColorInfo() const { return colorFramesInfo_; }
 
-private:
-  size_t size_;
-  fusion::geometry::Mat4d intrinsics_;
-  std::vector<fusion::geometry::Mat4d> poses_;
-  std::vector<std::unique_ptr<uint16_t>> depthImages_;
-  std::vector<std::unique_ptr<uint8_t>> colorImages_;
-  std::vector<FrameInfo> depthFramesInfo_;
-  std::vector<FrameInfo> colorFramesInfo_;
+  private:
+    size_t size_;
+    fusion::math::Mat4d intrinsics_;
+    std::vector<fusion::math::Mat4d> poses_;
+    std::vector<std::unique_ptr<uint16_t>> depthImages_;
+    std::vector<std::unique_ptr<uint8_t>> colorImages_;
+    std::vector<FrameInfo> depthFramesInfo_;
+    std::vector<FrameInfo> colorFramesInfo_;
 
-  void readIntrinsics(const std::string& filename);
-  void readDepth(const std::string& filename);
-  void readColor(const std::string& filename);
-  void readPose(const std::string& filename);
+    void readIntrinsics(const std::string& filename);
+    void readDepth(const std::string& filename);
+    void readColor(const std::string& filename);
+    void readPose(const std::string& filename);
 };
 } // namespace tests

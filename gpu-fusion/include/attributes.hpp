@@ -17,11 +17,22 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cuda.h>
 
-static inline void exitError(const char *msg = "")
-{
-    fprintf(stderr, "Error : %s\n", msg);
-    exit(EXIT_FAILURE);
-}
+#ifdef __NVCC__
+#    define ATTR_INL __forceinline__
+#    define ATTR_DEV __device__
+#    define ATTR_HOST __host__
+#    define ATTR_HOST_DEV __host__ __device__
+#    define ATTR_HOST_INL __host__ __forceinline__
+#    define ATTR_DEV_INL __device__ __forceinline__
+#    define ATTR_HOST_DEV_INL __host__ __device__ __forceinline__
+#else
+#    define ATTR_INL inline
+#    define ATTR_DEV
+#    define ATTR_HOST
+#    define ATTR_HOST_DEV
+#    define ATTR_HOST_INL inline
+#    define ATTR_DEV_INL inline
+#    define ATTR_HOST_DEV_INL inline
+#endif

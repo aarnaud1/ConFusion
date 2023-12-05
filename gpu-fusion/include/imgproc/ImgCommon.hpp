@@ -17,11 +17,15 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "utils/Ptr.hpp"
+#include "utils/Img.hpp"
+#include "utils/Buffer2D.hpp"
+#include "imgproc/formats.hpp"
+#include "imgproc/Image2D.hpp"
 
-static inline void exitError(const char *msg = "")
+namespace fusion
 {
-    fprintf(stderr, "Error : %s\n", msg);
-    exit(EXIT_FAILURE);
-}
+template <typename T>
+void performNmsSuppression(
+    const Buffer2D<T>& inputImg, Buffer2D<T>& outputImg, const cudaStream_t& stream);
+} // namespace fusion

@@ -20,7 +20,7 @@
 #include <string>
 
 #include <common.hpp>
-#include <geometry/geometry.hpp>
+#include <math/geometry.hpp>
 
 #define KINECT_IMG_H 480
 #define KINECT_IMG_W 640
@@ -43,79 +43,82 @@
 
 struct CameraParameters
 {
-  size_t cameraWidth;
-  size_t cameraHeight;
-  // fusion::CameraIntrinsics<float> depthIntrinsics;
-  fusion::geometry::Mat4<float> OPENGL_TO_CAMERA;
-  fusion::geometry::Mat4<float> AXIS_PERMUT;
-  fusion::geometry::Mat4<float> MODEL_TO_OPENGL;
+    size_t cameraWidth;
+    size_t cameraHeight;
+    // fusion::CameraIntrinsics<float> depthIntrinsics;
+    fusion::math::Mat4<float> OPENGL_TO_CAMERA;
+    fusion::math::Mat4<float> AXIS_PERMUT;
+    fusion::math::Mat4<float> MODEL_TO_OPENGL;
 
-  CameraParameters() = default;
+    CameraParameters() = default;
 
-  CameraParameters& operator=(CameraParameters const& cp) = default;
+    CameraParameters& operator=(CameraParameters const& cp) = default;
 };
 
 struct FusionParameters
 {
-  float tau;
-  float voxelRes;
+    float tau;
+    float voxelRes;
 };
 
-static const CameraParameters FR1_PARAMS = {
-    KINECT_IMG_W, KINECT_IMG_H,
-    // {INTRINSICS},
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, -1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, -1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f))};
+static const CameraParameters FR1_PARAMS
+    = {KINECT_IMG_W,
+       KINECT_IMG_H,
+       // {INTRINSICS},
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, -1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, -1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f))};
 
-static const CameraParameters ICL1_PARAMS = {
-    KINECT_IMG_W, KINECT_IMG_H,
-    // {ICL_INTRINSICS_1},
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f))};
+static const CameraParameters ICL1_PARAMS
+    = {KINECT_IMG_W,
+       KINECT_IMG_H,
+       // {ICL_INTRINSICS_1},
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f))};
 
-static const CameraParameters SYNTHETIC_0_PARAMS = {
-    KINECT_IMG_W, KINECT_IMG_H,
-    // {SYNTHETIC_0},
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
-    fusion::geometry::Mat4<float>(
-        fusion::geometry::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::geometry::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f))};
+static const CameraParameters SYNTHETIC_0_PARAMS
+    = {KINECT_IMG_W,
+       KINECT_IMG_H,
+       // {SYNTHETIC_0},
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f)),
+       fusion::math::Mat4<float>(
+           fusion::math::Vec4<float>(1.0f, 0.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 1.0f, 0.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, -1.0f, 0.0f),
+           fusion::math::Vec4<float>(0.0f, 0.0f, 0.0f, 1.0f))};
 
 #pragma GCC diagnostic pop

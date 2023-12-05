@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien ARNAUD
+ * Copyright (C) 2022 Adrien ARNAUD
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,13 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
-static inline void exitError(const char *msg = "")
-{
-    fprintf(stderr, "Error : %s\n", msg);
-    exit(EXIT_FAILURE);
-}
+#include <attributes.hpp>
+
+#include "math/vec2.hpp"
+#include "math/vec3.hpp"
+#include "math/vec4.hpp"
+#include "math/mat3.hpp"
+#include "math/mat4.hpp"
