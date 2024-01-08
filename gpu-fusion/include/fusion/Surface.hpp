@@ -18,8 +18,8 @@
 #pragma once
 
 #include "common.hpp"
-#include "utils/Ptr.hpp"
 #include "math/geometry.hpp"
+#include "utils/Ptr.hpp"
 
 namespace fusion
 {

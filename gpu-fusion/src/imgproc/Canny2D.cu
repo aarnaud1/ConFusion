@@ -15,9 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "math/geometry.hpp"
-#include "imgproc/Canny2D.hpp"
 #include "imgProcCommon.inl"
+#include "imgproc/Canny2D.hpp"
+#include "math/geometry.hpp"
 
 namespace fusion
 {

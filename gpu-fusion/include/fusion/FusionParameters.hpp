@@ -27,8 +27,10 @@ struct FusionParameters
     float tau;
     float near;
     float far;
+    float depthScale;
     size_t maxWidth;
     size_t maxHeight;
-    math::Mat3d intrinsics;
+    math::Mat3f intrinsics;
+    math::Mat4f camToSensor; // Converts world camera coordinates to sensor coordinates
 };
 } // namespace fusion

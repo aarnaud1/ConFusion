@@ -15,8 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "imgproc/Harris2D.hpp"
 #include "imgProcCommon.inl"
+#include "imgproc/Harris2D.hpp"
 
 namespace fusion
 {

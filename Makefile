@@ -25,6 +25,7 @@ HOST_LFLAGS := -Wl\,-rpath\,./GL/lib -lglfw -lgflags \
 								-lopencv_imgcodecs -lopencv_core -lopencv_imgproc \
 								-lopencv_highgui -ltinyply
 NVCC_FLAGS := $(OPT_LVL) --machine=64 --use_fast_math --restrict\
+							--generate-line-info \
 							--default-stream=per-thread \
 							--expt-relaxed-constexpr --expt-extended-lambda \
 							-m64 \
@@ -59,6 +60,7 @@ deps:
 	$(shell mkdir -p output/obj/fusion)
 	$(shell mkdir -p output/obj/imgproc)
 	$(shell mkdir -p output/obj/io)
+	$(shell mkdir -p output/obj/marching_cubes)
 	$(shell mkdir -p output/obj/utils)
 	$(shell mkdir -p output/lib/)
 
@@ -66,7 +68,7 @@ output/obj/%.cu.o: gpu-fusion/src/%.cu
 	$(NVCC) $(NVCC_FLAGS) -Xcompiler '-fPIC' $(IFLAGS) -dc $< -o $@
 
 output/obj/%.o: gpu-fusion/src/%.cpp
-	$(CXX) $(HOST_CFLAGS) -c -fPIC $(IFLAGS) -o $@ $<
+	$(CXX) $(HOST_CFLAGS) --pedantic -c -fPIC $(IFLAGS) -o $@ $<
 
 $(MODULE): $(CU_OBJ_FILES) $(OBJ_FILES)
 	$(NVCC) $(NVCC_FLAGS) -shared -o $@ $^
@@ -76,7 +78,7 @@ output/bin/main: main/src/main.cpp $(MODULE)
 	$(HOST_LFLAGS) -L/usr/local/cuda/lib64 -lcuda -lcudart
 
 output/bin/test_%: main/src/test_%.cpp $(MODULE)
-	$(CXX) $(HOST_CFLAGS) $(IFLAGS) -o $@ $^ $(MAIN_SRC_FILES) \
+	$(CXX) $(HOST_CFLAGS) --pedantic $(IFLAGS) -o $@ $^ $(MAIN_SRC_FILES) \
 	$(HOST_LFLAGS) -L/usr/local/cuda/lib64 -lcuda -lcudart
 
 clean:

@@ -17,9 +17,10 @@
 
 #pragma once
 
-#include <cuda.h>
 #include "attributes.hpp"
 #include "math/geometry.hpp"
+
+#include <cuda.h>
 
 namespace fusion
 {

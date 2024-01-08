@@ -15,25 +15,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <chrono>
-#include <string>
-#include <memory>
 #include <gflags/gflags.h>
-
-#include <imgproc/Image2D.hpp>
 #include <imgproc/Gauss2D.hpp>
 #include <imgproc/Harris2D.hpp>
 #include <imgproc/Image2D.hpp>
 #include <imgproc/ImgCommon.hpp>
-
+#include <iostream>
+#include <memory>
 #include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <string>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter" *

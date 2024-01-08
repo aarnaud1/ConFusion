@@ -15,8 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "imgproc/ImgCommon.hpp"
 #include "imgProcCommon.inl"
+#include "imgproc/ImgCommon.hpp"
 
 namespace fusion
 {

@@ -17,10 +17,10 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-
 #include "math/geometry.hpp"
+
+#include <string>
+#include <vector>
 
 namespace fusion
 {

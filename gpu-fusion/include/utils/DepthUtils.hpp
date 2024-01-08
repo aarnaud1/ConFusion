@@ -18,10 +18,10 @@
 #pragma once
 
 #include "math/geometry.hpp"
-#include "utils/Ptr.hpp"
-#include "utils/Img.hpp"
 #include "utils/Buffer2D.hpp"
 #include "utils/DepthUtils.hpp"
+#include "utils/Img.hpp"
+#include "utils/Ptr.hpp"
 
 #include <cuda.h>
 
@@ -41,30 +41,30 @@ namespace utils
     void extractPoints(
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream);
     void extractPoints(
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
         GpuPtr<math::Vec3f>& bbox,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream);
     void extractPoints(
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
         GpuPtr<float>& footprints,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream);
     void extractPoints(
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
         GpuPtr<float>& footprints,
         GpuPtr<math::Vec3f>& bbox,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream);
 
     void extractColors(

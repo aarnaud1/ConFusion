@@ -17,14 +17,14 @@
 
 #pragma once
 
-#include <utils/Ptr.hpp>
 #include <utils/Img.hpp>
+#include <utils/Ptr.hpp>
 
 namespace fusion
 {
 // Wrapper class around fusion::BaseImg that allow to use the same data container for images with
 // different sizes.
-// A uffer2D instance can be allocated with a max width and height, then resized without any
+// A Buffer2D instance can be allocated with a max width and height, then resized without any
 // allocation as long as the contained image dimensions are less than the max dimensions.
 template <typename T>
 class Buffer2D

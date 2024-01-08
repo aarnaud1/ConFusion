@@ -19,8 +19,8 @@
 
 #include "common.hpp"
 
-#include <cuda.h>
 #include <cstdint>
+#include <cuda.h>
 #include <type_traits>
 
 namespace fusion
@@ -141,12 +141,12 @@ class BasePtr final
 
     inline T& operator[](const size_t i) noexcept
     {
-        static_assert(memory_kind == MemType::HOST, "Operator[] implemented only for host memory");
+        static_assert(memory_kind == MemType::HOST, "operator[] implemented only for host memory");
         return data_[i];
     }
     inline const T& operator[](const size_t i) const noexcept
     {
-        static_assert(memory_kind == MemType::HOST, "Operator[] implemented only for host memory");
+        static_assert(memory_kind == MemType::HOST, "operator[] implemented only for host memory");
         return data_[i];
     }
 

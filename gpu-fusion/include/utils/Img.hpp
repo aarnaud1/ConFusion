@@ -20,17 +20,8 @@
 #include "common.hpp"
 #include "utils/Ptr.hpp"
 
-#include <array>
-
 namespace fusion
 {
-// TODO : get rid of it
-enum class ColorFormat : uint32_t
-{
-    RGB,
-    BGR
-};
-
 template <typename T, bool pageLocked>
 struct HostImgAllocator
 {};

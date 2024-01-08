@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien ARNAUD
+ * Copyright (C) 2024 Adrien ARNAUD
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
 #include "fusion/VoxelBlock.hpp"
 
 #include <list>
+#include <set>
 #include <unordered_map>
 #include <vector>
-#include <set>
 
 namespace fusion
 {

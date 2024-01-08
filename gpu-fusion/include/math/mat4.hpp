@@ -17,18 +17,17 @@
 
 #pragma once
 
-#include <iostream>
-
-#include <stdint.h>
-#include <math.h>
-#include <string.h>
-#include <type_traits>
-
 #include "attributes.hpp"
 #include "common.hpp"
+#include "math/mat3.hpp"
 #include "math/vec3.hpp"
 #include "math/vec4.hpp"
-#include "math/mat3.hpp"
+
+#include <iostream>
+#include <math.h>
+#include <stdint.h>
+#include <string.h>
+#include <type_traits>
 
 namespace fusion
 {
@@ -94,7 +93,8 @@ namespace math
         }
 
         ATTR_HOST_DEV_INL
-        Mat4(const Vec4<T> &v0, const Vec4<T> &v1, const Vec4<T> &v2, const Vec4<T> &v3) noexcept
+        constexpr Mat4(
+            const Vec4<T> &v0, const Vec4<T> &v1, const Vec4<T> &v2, const Vec4<T> &v3) noexcept
         {
             this->c00 = v0.x;
             this->c01 = v0.y;

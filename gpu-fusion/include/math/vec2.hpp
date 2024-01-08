@@ -17,16 +17,15 @@
 
 #pragma once
 
-#include <iostream>
-
-#include <math.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <type_traits>
-
 #include "attributes.hpp"
 #include "common.hpp"
+
+#include <iostream>
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <type_traits>
 
 namespace fusion
 {

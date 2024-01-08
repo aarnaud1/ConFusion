@@ -18,12 +18,11 @@
 #pragma once
 
 #define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <attributes.hpp>
-
+#include "math/mat3.hpp"
+#include "math/mat4.hpp"
 #include "math/vec2.hpp"
 #include "math/vec3.hpp"
 #include "math/vec4.hpp"
-#include "math/mat3.hpp"
-#include "math/mat4.hpp"
+
+#include <attributes.hpp>
+#include <math.h>

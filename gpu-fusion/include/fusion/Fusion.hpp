@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien ARNAUD
+ * Copyright (C) 2024 Adrien ARNAUD
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,18 +18,18 @@
 #pragma once
 
 #include "common.hpp"
-#include "utils/Ptr.hpp"
-#include "utils/Img.hpp"
-#include "math/geometry.hpp"
-#include "fusion/FusionParameters.hpp"
 #include "fusion/DepthFrame.hpp"
-#include "fusion/VoxelBlock.hpp"
+#include "fusion/FusionParameters.hpp"
 #include "fusion/Volume.hpp"
+#include "fusion/VoxelBlock.hpp"
+#include "math/geometry.hpp"
+#include "utils/Img.hpp"
+#include "utils/Ptr.hpp"
 
-#include <memory>
-#include <vector>
-#include <string>
 #include <array>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace fusion
 {
@@ -41,7 +41,7 @@ class Fusion final
 {
   public:
     static constexpr size_t maxBatchSize = 16;
-    static constexpr size_t maxBlockCount = 10000; // TODO : compute with available memory
+    static constexpr size_t maxBlockCount = 50000; // TODO : compute with available memory
 
     Fusion(const FusionParameters& params);
     Fusion(const Fusion&) = default;
@@ -52,14 +52,16 @@ class Fusion final
     ~Fusion();
 
     void integrateFrames(
-        const std::vector<CpuFrameType>& frames,
-        const std::vector<math::Mat4d>& poses,
-        const float depthScale);
+        const std::vector<CpuFrameType>& frames, const std::vector<math::Mat4f>& poses);
+
+    void exportFinalMesh(const char* filename) { volume_.exportMesh(filename); }
+
+    void exportFrame(const CpuFrameType& frame, const math::Mat4f& m, const char* filename);
 
   private:
-    FusionParameters params_;
+    static constexpr bool renderFrames = true;
 
-    const size_t maxBlockCount_ = 100000; // TODO : compute
+    FusionParameters params_;
 
     Volume volume_;
 
@@ -72,6 +74,9 @@ class Fusion final
     std::array<GpuFrameType, maxBatchSize> frames_;
     std::array<GpuPtr<uint32_t>, maxBatchSize> blockCounts_;
     std::array<GpuPtr<uint64_t>, maxBatchSize> blockList_;
+    GpuPtr<GpuFrameData> framesToIntegrate_{maxBatchSize};
+    GpuPtr<math::Mat4f> posesToIntegrate_{maxBatchSize};
+    GpuPtr<BlockHeader> headers_{maxBlockCount};
 
     // Tmp data
     std::array<GpuPtr<uint64_t>, maxBatchSize> sortedBlockIds_;
@@ -83,6 +88,9 @@ class Fusion final
     std::array<StagingFrameType, maxBatchSize> framesHost_;
     std::array<CpuPtr<uint32_t, true>, maxBatchSize> blockCountsHost_;
     std::array<CpuPtr<uint64_t, true>, maxBatchSize> blockListHost_;
+    CpuPtr<GpuFrameData, true> framesToIntegrateHost_{maxBatchSize};
+    CpuPtr<math::Mat4f, true> posesToIntegrateHost_{maxBatchSize};
+    CpuPtr<BlockHeader, true> headersHost_{maxBlockCount};
 
     inline void notifySubStreamsStart(const size_t batchSize)
     {
@@ -109,15 +117,23 @@ class Fusion final
 
     void prepareFrames(
         const std::vector<CpuFrameType>& frames,
-        const std::vector<math::Mat4d>& poses,
+        const std::vector<math::Mat4f>& poses,
         const size_t batchOffset,
-        const size_t batchSize,
-        const float depthScale);
+        const size_t batchSize);
 
     void computeIntersectingBlocks(
-        const std::vector<math::Mat4d>& poses, const size_t batchOffset, const size_t batchSize);
+        const std::vector<math::Mat4f>& poses, const size_t batchOffset, const size_t batchSize);
 
     std::vector<math::Vec3i> getIntersectingBlocks(const size_t batchSize);
+
+    void performIntegration(
+        const BlockIdList& blockIds,
+        const std::vector<math::Mat4f>& poses,
+        const size_t batchOffset,
+        const size_t batchSize);
+
+    void raycastFrames(
+        const std::vector<math::Mat4f>& poses, const size_t batchOffset, const size_t batchSize);
 
     void allocateMemory(const size_t width, const size_t height);
 

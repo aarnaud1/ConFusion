@@ -16,12 +16,13 @@
  */
 
 #include "io/Ply.hpp"
+
 #include "common.hpp"
 
-#include <stdexcept>
+#include <fstream>
 #include <iostream>
 #include <memory>
-#include <fstream>
+#include <stdexcept>
 #include <tinyply.h>
 
 namespace fusion
@@ -36,7 +37,7 @@ namespace io
         const std::vector<math::Vec3<uint8_t>>& rgb,
         const std::vector<math::Vec3f>& normals)
     {
-        utils::Log::info("Ply", "Exporting %s...\n", filename.c_str());
+        utils::Log::info("Ply", "Exporting %s...", filename.c_str());
 
         std::filebuf fb;
         fb.open(filename, std::ios::out | std::ios::binary);
@@ -91,7 +92,7 @@ namespace io
 
         outFile.get_comments().push_back("GPU Fusion V1.0");
         outFile.write(os, true);
-        utils::Log::info("Ply", "Exporting %s : done\n", filename.c_str());
+        utils::Log::info("Ply", "Exporting %s : done", filename.c_str());
     }
 
     void Ply::saveSurface(
@@ -100,7 +101,7 @@ namespace io
         const std::vector<math::Vec3<uint8_t>>& rgb,
         const std::vector<math::Vec3i>& triangles)
     {
-        utils::Log::info("Ply", "Exporting %s...\n", filename.c_str());
+        utils::Log::info("Ply", "Exporting %s...", filename.c_str());
         if(rgb.size() != xyz.size())
         {
             throw std::runtime_error("Error exporting .ply fie : xyz and rgb sizes mismatch");
@@ -143,7 +144,7 @@ namespace io
         outFile.get_comments().push_back("GPU Fusion V1.0");
         outFile.write(os, true);
 
-        utils::Log::info("Ply", "Exporting %s : done\n", filename.c_str());
+        utils::Log::info("Ply", "Exporting %s : done", filename.c_str());
     }
 
     void Ply::saveSurface(
@@ -153,7 +154,7 @@ namespace io
         const std::vector<math::Vec3f>& normals,
         const std::vector<math::Vec3i>& triangles)
     {
-        utils::Log::info("Ply", "Exporting %s...\n", filename.c_str());
+        utils::Log::info("Ply", "Exporting %s...", filename.c_str());
         if(rgb.size() != xyz.size())
         {
             throw std::runtime_error("Error exporting .ply fie : xyz and rgb sizes mismatch");
@@ -208,7 +209,7 @@ namespace io
         outFile.get_comments().push_back("GPU Fusion V1.0");
         outFile.write(os, true);
 
-        utils::Log::info("Ply", "Exporting %s : done\n", filename.c_str());
+        utils::Log::info("Ply", "Exporting %s : done", filename.c_str());
     }
 } // namespace io
 } // namespace fusion

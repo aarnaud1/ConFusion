@@ -18,8 +18,8 @@
 #pragma once
 
 #include "attributes.hpp"
-#include "utils/Ptr.hpp"
 #include "math/geometry.hpp"
+#include "utils/Ptr.hpp"
 
 namespace fusion
 {
@@ -38,7 +38,12 @@ struct VolumeHash
     static constexpr size_t p2 = 19349663;
     static constexpr size_t p3 = 83492791;
 
-    inline std::size_t operator()(const math::Vec3i& key) const
+    ATTR_HOST_INL std::size_t operator()(const math::Vec3i& key) const
+    {
+        return (key.x * p1 ^ key.y * p2 ^ key.z * p3);
+    }
+
+    static ATTR_HOST_DEV_INL size_t hashIndex(const math::Vec3i& key)
     {
         return (key.x * p1 ^ key.y * p2 ^ key.z * p3);
     }
@@ -46,6 +51,11 @@ struct VolumeHash
 
 namespace utils
 {
+    ATTR_HOST_DEV_INL static size_t hashIndex(const math::Vec3i& id, const size_t n)
+    {
+        return VolumeHash::hashIndex(id) % n;
+    }
+
     ATTR_HOST_DEV_INL static bool isValidBlock(const math::Vec3i& id)
     {
         return id != DEFAULT_BLOCK_ID;

@@ -17,10 +17,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <common.hpp>
 #include <math/geometry.hpp>
+#include <string>
 
 #define KINECT_IMG_H 480
 #define KINECT_IMG_W 640

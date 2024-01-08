@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien ARNAUD
+ * Copyright (C) 2024 Adrien ARNAUD
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +15,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#include <DepthMapDataset.hpp>
+#include <Parameters.hpp>
+#include <chrono>
+#include <common.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <chrono>
-#include <string>
-#include <memory>
-#include <gflags/gflags.h>
-
-#include <Parameters.hpp>
-#include <DepthMapDataset.hpp>
-
-#include <common.hpp>
-#include <utils/Ptr.hpp>
 #include <fusion/Fusion.hpp>
+#include <gflags/gflags.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utils/Ptr.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -39,6 +37,9 @@ using Vec4 = fusion::math::Vec4<float>;
 
 DEFINE_string(dataset, "", "Dataset path");
 DEFINE_uint64(frameCount, 0, "Number of frames to load");
+DEFINE_double(maxDepth, 10.0, "Max depth");
+DEFINE_double(voxelRes, 0.1, "Voxel resolution");
+DEFINE_double(tau, 0.1, "Truncation distance (in meters)");
 
 int main(int argc, char** argv)
 {
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
     std::vector<fusion::CpuFrameType> frames;
     frames.resize(dataset.size());
 
-    std::vector<fusion::math::Mat4d> poses;
+    std::vector<fusion::math::Mat4f> poses;
     poses.resize(dataset.size());
 
     size_t maxWidth = 0;
@@ -95,10 +96,41 @@ int main(int argc, char** argv)
     fusion::utils::Log::message("Running fusion...");
     try
     {
-        const fusion::FusionParameters params{
-            0.01f, 0.2f, 0.0f, 5.0f, maxWidth, maxHeight, dataset.intrinsics().GetRotation()};
+        const float maxDepth = static_cast<float>(FLAGS_maxDepth);
+        const float voxelRes = static_cast<float>(FLAGS_voxelRes);
+        const float tau = static_cast<float>(FLAGS_tau);
+
+        fusion::FusionParameters params;
+        params.voxelRes = voxelRes;
+        params.tau = tau;
+        params.near = 0.0f;
+        params.far = maxDepth;
+        params.depthScale = depthScale;
+        params.maxWidth = maxWidth;
+        params.maxHeight = maxHeight;
+        params.intrinsics = dataset.intrinsics().GetRotation();
+        params.camToSensor = fusion::math::Mat4f{
+            fusion::math::Vec4f{0.0f, -1.0f, 0.0f, 0.0f},
+            fusion::math::Vec4f{1.0f, 0.0f, 0.0f, 0.0f},
+            fusion::math::Vec4f{0.0f, 0.0f, -1.0f, 0.0f},
+            fusion::math::Vec4f{0.0f, 0.0f, 0.0f, 1.0f}};
+
         fusion::Fusion fusion{params};
-        fusion.integrateFrames(frames, poses, depthScale);
+        fusion.integrateFrames(frames, poses);
+        fusion.exportFinalMesh("output.ply");
+
+        // Export frames
+        // int frameCount = 0;
+        // for(size_t frameId = 0; frameId < frames.size(); ++frameId)
+        // {
+        //     char filename[512];
+        //     snprintf(filename, 512, "frame_%d.ply", frameCount);
+        //     fusion.exportFrame(frames[frameId], poses[frameId], filename);
+        //     snprintf(filename, 512, "frame_untransformed_%d.ply", frameCount);
+        //     fusion.exportFrame(
+        //         frames[frameId], fusion::math::Mat4f::Inverse(params.camToSensor), filename);
+        //     frameCount++;
+        // }
     }
     catch(const std::exception& e)
     {

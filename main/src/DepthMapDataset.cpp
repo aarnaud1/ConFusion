@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien ARNAUD
+ * Copyright (C) 2024 Adrien ARNAUD
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,11 @@
 #include "DepthMapDataset.hpp"
 
 #include <filesystem>
-#include <iostream>
 #include <fstream>
-#include <sstream>
-
+#include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
@@ -73,7 +72,7 @@ DepthMapDataset::DepthMapDataset(const std::string& dir, const size_t n) : size_
 
 void DepthMapDataset::readIntrinsics(const std::string& filename)
 {
-    auto M = fusion::math::Mat4d::Identity();
+    auto M = fusion::math::Mat4f::Identity();
     std::string line;
     std::ifstream ifs(filename.c_str());
     if(!ifs)
@@ -140,8 +139,8 @@ void DepthMapDataset::readColor(const std::string& filename)
 
 void DepthMapDataset::readPose(const std::string& filename)
 {
-    fusion::math::Vec3d T;
-    fusion::math::Vec4d Q;
+    fusion::math::Vec3f T;
+    fusion::math::Vec4f Q;
     std::string line;
     std::ifstream ifs(filename.c_str());
     if(!ifs)
@@ -152,10 +151,15 @@ void DepthMapDataset::readPose(const std::string& filename)
     }
     std::getline(ifs, line);
     std::istringstream iss(line);
-    iss >> T.x >> T.y >> T.z >> Q.w >> Q.x >> Q.y >> Q.z;
+    iss >> T.x >> T.y >> T.z >> Q.x >> Q.y >> Q.z >> Q.w;
 
-    const auto M = fusion::math::Mat4d::Affine(Q, T);
-    poses_.emplace_back(M);
+    const auto M = fusion::math::Mat4f::Affine(fusion::math::Vec4f{Q.x, Q.y, Q.z, -Q.w}, T);
+    const fusion::math::Mat4f axis{
+        fusion::math::Vec4f(1.0f, 0.0f, 0.0f, 0.0f),
+        fusion::math::Vec4f(0.0f, 1.0f, 0.0f, 0.0f),
+        fusion::math::Vec4f(0.0f, 0.0f, -1.0f, 0.0f),
+        fusion::math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f)};
+    poses_.emplace_back(axis * M);
 }
 
 } // namespace tests

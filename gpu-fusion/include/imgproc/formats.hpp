@@ -17,9 +17,9 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include "math/geometry.hpp"
+
+#include <cstdint>
 
 namespace fusion
 {

@@ -15,9 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utils/DepthUtils.hpp"
-#include "Ptr.inl"
 #include "DepthUtils.inl"
+#include "Ptr.inl"
+#include "utils/DepthUtils.hpp"
 
 #include <cub/cub.cuh>
 
@@ -112,11 +112,11 @@ namespace utils
     // ----------------------------------- Points extraction ---------------------------------------
     // ---------------------------------------------------------------------------------------------
 
-    __global__ __launch_bounds__(blockSize) static void extractPointsKernel(
+    __global__ static void extractPointsKernel(
         const uint16_t* __restrict__ depth,
         math::Vec3f* __restrict__ points,
         const float scale,
-        const math::Mat3d k,
+        const math::Mat3f k,
         const size_t w,
         const size_t h,
         const size_t stride)
@@ -126,22 +126,21 @@ namespace utils
         const double fx = k.c00;
         const double fy = k.c11;
 
-        for(size_t j = blockIdx.x * blockDim.x + threadIdx.x; j < w; j += blockDim.x * gridDim.x)
+        for(size_t idx = blockIdx.x * blockDim.x + threadIdx.x; idx < w * h;
+            idx += blockDim.x * gridDim.x)
         {
-            for(size_t i = blockIdx.y * blockDim.y + threadIdx.y; i < h;
-                i += blockDim.y * gridDim.y)
+            const size_t j = idx % w;
+            const size_t i = idx / w;
+            const uint16_t d = depth[i * stride + j];
+            if(d > 0)
             {
-                const uint16_t d = depth[i * stride + j];
-                if(d > 0)
-                {
-                    const auto p0 = getPoint(d, j, i, scale, cx, cy, fx, fy);
-                    const auto p1 = getPoint(d, j + 1, i + 1, scale, cx, cy, fx, fy);
-                    points[i * w + j] = p0;
-                }
-                else
-                {
-                    points[i * w + j] = math::Vec3f{std::numeric_limits<float>::max()};
-                }
+                const auto p0 = getPoint(d, j, i, scale, cx, cy, fx, fy);
+                const auto p1 = getPoint(d, j + 1, i + 1, scale, cx, cy, fx, fy);
+                points[i * w + j] = p0;
+            }
+            else
+            {
+                points[i * w + j] = math::Vec3f{std::numeric_limits<float>::max()};
             }
         }
     }
@@ -151,7 +150,7 @@ namespace utils
         math::Vec3f* __restrict__ points,
         math::Vec3f* __restrict__ bbox,
         const float scale,
-        const math::Mat3d k,
+        const math::Mat3f k,
         const size_t w,
         const size_t h,
         const size_t stride)
@@ -209,7 +208,6 @@ namespace utils
         }
 
         // Perform reduction
-        // TODO : check performances
         auto localMin = BlockReduce(tmpStorage).Reduce(minPoint, Vec3ReduceMin());
         __syncthreads();
 
@@ -233,7 +231,7 @@ namespace utils
         math::Vec3f* __restrict__ points,
         float* __restrict__ footprints,
         const float scale,
-        const math::Mat3d k,
+        const math::Mat3f k,
         const size_t w,
         const size_t h,
         const size_t stride)
@@ -271,7 +269,7 @@ namespace utils
         float* __restrict__ footprints,
         math::Vec3f* __restrict__ bbox,
         const float scale,
-        const math::Mat3d k,
+        const math::Mat3f k,
         const size_t w,
         const size_t h,
         const size_t stride)
@@ -499,7 +497,7 @@ namespace utils
         math::Vec3f* __restrict__ points,
         math::Vec3f* __restrict__ normals,
         uint8_t* __restrict__ masks,
-        const math::Mat4d& m,
+        const math::Mat4f& m,
         const size_t n)
     {
         for(size_t idx = blockIdx.x * blockDim.x + threadIdx.x; idx < n;
@@ -507,8 +505,8 @@ namespace utils
         {
             if(masks[idx])
             {
-                points[idx] = m * math::Vec4d(points[idx], 1.0);
-                normals[idx] = m.GetRotation() * math::Vec3d(normals[idx]);
+                points[idx] = m * points[idx];
+                normals[idx] = m.GetRotation() * normals[idx];
             }
         }
     }
@@ -576,16 +574,17 @@ namespace utils
     void extractPoints(
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream)
     {
+        static constexpr size_t threads = 512;
         const size_t res = depth.width() * depth.height();
         if(res > points.size())
         {
             throw std::runtime_error("extractPoints() : points buffer not large enough");
         }
-        extractPointsKernel<<<32, dim3(blockSizeX, blockSizeY), 0, stream>>>(
+        extractPointsKernel<<<utils::div_up(res, threads), threads, 0, stream>>>(
             depth, points, depthScale, k, depth.width(), depth.height(), depth.stride());
     }
 
@@ -593,8 +592,8 @@ namespace utils
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
         GpuPtr<math::Vec3f>& bbox,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream)
     {
         const size_t res = depth.width() * depth.height();
@@ -610,8 +609,8 @@ namespace utils
         const GpuImg<uint16_t>& depth,
         GpuPtr<math::Vec3f>& points,
         GpuPtr<float>& footprints,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream)
     {
         const size_t res = depth.width() * depth.height();
@@ -639,8 +638,8 @@ namespace utils
         GpuPtr<math::Vec3f>& points,
         GpuPtr<float>& footprints,
         GpuPtr<math::Vec3f>& bbox,
-        const math::Mat3d& k,
-        const size_t depthScale,
+        const math::Mat3f& k,
+        const float depthScale,
         const cudaStream_t& stream)
     {
         const size_t res = depth.width() * depth.height();

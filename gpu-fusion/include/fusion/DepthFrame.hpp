@@ -18,10 +18,10 @@
 #pragma once
 
 #include "common.hpp"
-#include "utils/Ptr.hpp"
-#include "utils/Img.hpp"
-#include "utils/DepthUtils.hpp"
 #include "math/geometry.hpp"
+#include "utils/DepthUtils.hpp"
+#include "utils/Img.hpp"
+#include "utils/Ptr.hpp"
 
 namespace fusion
 {
@@ -29,7 +29,8 @@ struct GpuFrameData
 {
     size_t width;
     size_t height;
-
+    
+    uint16_t* depth;
     math::Vec3f* points;
     math::Vec3f* colors;
     math::Vec3f* normals;
@@ -68,17 +69,14 @@ class GpuFrame
         normals_.resize(width_ * height_);
     }
 
-    void prepare(const math::Mat3d& k, const float depthScale, const cudaStream_t& stream)
+    void prepare(const math::Mat3f& k, const float depthScale, const cudaStream_t& stream)
     {
         utils::initRGBDFrame(depthData_, rgbData_, depth_, rgb_, width_, height_, stream);
         utils::extractPoints(depth_, points_, k, depthScale, stream);
         utils::extractColors(rgb_, colors_, true, stream);
     }
 
-    GpuFrameData getData()
-    {
-        return {width_, height_, points_.data(), colors_.data(), normals_.data()};
-    }
+    GpuFrameData getData() { return {width_, height_, depthData_, points_, colors_, normals_}; }
 
     auto width() const { return width_; }
     auto height() const { return height_; }
@@ -128,7 +126,7 @@ class GpuFrame
     GpuPtr<math::Vec3f> normals_;
 };
 
-template <bool frameLocked = false>
+template <bool pageLocked = false>
 class CpuFrame final
 {
   public:
@@ -149,8 +147,8 @@ class CpuFrame final
         rgb_.resize(3 * width_ * height_);
     }
 
-    template <bool dstFrameLocked>
-    void copyTo(CpuFrame<dstFrameLocked>& dst, const cudaStream_t& stream) const
+    template <bool dstPageLocked>
+    void copyTo(CpuFrame<dstPageLocked>& dst, const cudaStream_t& stream) const
     {
         depth_.copyTo(dst.depth(), stream);
         rgb_.copyTo(dst.rgb(), stream);
@@ -175,8 +173,8 @@ class CpuFrame final
     size_t width_{0};
     size_t height_{0};
 
-    CpuPtr<uint16_t, false> depth_;
-    CpuPtr<uint8_t, false> rgb_;
+    CpuPtr<uint16_t, pageLocked> depth_;
+    CpuPtr<uint8_t, pageLocked> rgb_;
 };
 
 } // namespace fusion

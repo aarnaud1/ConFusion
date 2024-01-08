@@ -17,16 +17,15 @@
 
 #pragma once
 
-#include <iostream>
-
-#include <math.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <type_traits>
-
 #include "attributes.hpp"
 #include "common.hpp"
+
+#include <iostream>
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <type_traits>
 
 namespace fusion
 {
@@ -176,7 +175,7 @@ namespace math
         ret.x = v0.x + v1.x;
         ret.y = v0.y + v1.y;
         ret.z = v0.z + v1.z;
-        ret.t = v0.w + v1.w;
+        ret.w = v0.w + v1.w;
         return ret;
     }
 
@@ -187,7 +186,7 @@ namespace math
         ret.x = v0.x - v1.x;
         ret.y = v0.y - v1.y;
         ret.z = v0.z - v1.z;
-        ret.t = v0.w - v1.w;
+        ret.w = v0.w - v1.w;
         return ret;
     }
 
@@ -198,7 +197,7 @@ namespace math
         ret.x = k * v0.x;
         ret.y = k * v0.y;
         ret.z = k * v0.z;
-        ret.t = k * v0.w;
+        ret.w = k * v0.w;
         return ret;
     }
 
@@ -209,7 +208,7 @@ namespace math
         ret.x = k * v0.x;
         ret.y = k * v0.y;
         ret.z = k * v0.z;
-        ret.t = k * v0.w;
+        ret.w = k * v0.w;
         return ret;
     }
 

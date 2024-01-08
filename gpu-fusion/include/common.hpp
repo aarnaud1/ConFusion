@@ -17,11 +17,14 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstdio>
-#include <string>
-#include <stdexcept>
-#include <cuda_runtime.h>
 #include <cuda.h>
+#include <cuda_runtime.h>
+#include <stdexcept>
+#include <string>
+
+#include "attributes.hpp"
 
 #define gpuErrcheck(f)                                                                             \
     {                                                                                              \
@@ -63,7 +66,10 @@ namespace fusion
 {
 namespace utils
 {
-    static inline uint32_t div_up(const uint32_t x, const uint32_t n) { return (x + n - 1) / n; }
+    static ATTR_HOST_DEV_INL uint32_t div_up(const uint32_t x, const uint32_t n)
+    {
+        return (x + n - 1) / n;
+    }
 
     class Log
     {
@@ -73,9 +79,19 @@ namespace utils
         {
             if constexpr(LogLevel >= 0)
             {
-                char buf[1024];
-                snprintf(buf, 1024, format, args...);
+                char buf[lineSize];
+                snprintf(buf, lineSize, format, args...);
                 fprintf(stdout, "%s\n", buf);
+            }
+        }
+        template <typename... Args>
+        static inline void time(const char* tag, const char* format, Args... args)
+        {
+            if constexpr(LogLevel <= LOG_LEVEL_VERBOSE)
+            {
+                char buf[lineSize];
+                snprintf(buf, lineSize, format, args...);
+                fprintf(stdout, "\033[0;32m[%s]: %s\n\033[0m", tag, buf);
             }
         }
         template <typename... Args>
@@ -83,8 +99,8 @@ namespace utils
         {
             if constexpr(LogLevel <= LOG_LEVEL_VERBOSE)
             {
-                char buf[1024];
-                snprintf(buf, 1024, format, args...);
+                char buf[lineSize];
+                snprintf(buf, lineSize, format, args...);
                 fprintf(stdout, "\033[0;34m[%s]: %s\n\033[0m", tag, buf);
             }
         }
@@ -93,8 +109,8 @@ namespace utils
         {
             if constexpr(LogLevel <= LOG_LEVEL_WARNING)
             {
-                char buf[1024];
-                snprintf(buf, 1024, format, args...);
+                char buf[lineSize];
+                snprintf(buf, lineSize, format, args...);
                 fprintf(stdout, "\033[0;33m[%s]: %s\n\033[0m", tag, buf);
                 fflush(stdout);
             }
@@ -104,8 +120,8 @@ namespace utils
         {
             if constexpr(LogLevel <= LOG_LEVEL_ERROR)
             {
-                char buf[1024];
-                snprintf(buf, 1024, format, args...);
+                char buf[lineSize];
+                snprintf(buf, lineSize, format, args...);
                 fprintf(stdout, "\033[0;31m[%s]: %s\n\033[0m", tag, buf);
                 fflush(stdout);
             }
@@ -113,13 +129,14 @@ namespace utils
         template <typename... Args>
         static inline void critical(const char* tag, const char* format, Args... args)
         {
-            char buf[1024];
-            snprintf(buf, 1024, format, args...);
+            char buf[lineSize];
+            snprintf(buf, lineSize, format, args...);
             fprintf(stdout, "\033[0;31m[%s]: %s\n\033[0m", tag, buf);
             fflush(stderr);
         }
 
       private:
+        static constexpr size_t lineSize = 1024;
         static constexpr int LogLevel = LOG_LEVEL;
         Log() = default;
     };
@@ -128,22 +145,48 @@ namespace utils
 
 #pragma GCC diagnostic pop
 
-#define CHRONO(f)                                                                                  \
-    {                                                                                              \
-        auto start = std::chrono::steady_clock::now();                                             \
-        f;                                                                                         \
-        auto stop = std::chrono::steady_clock::now();                                              \
-        const double t                                                                             \
-            = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();         \
-    }
+namespace fusion
+{
+namespace utils
+{
+    class Timer
+    {
+      public:
+        inline Timer() = default;
+        inline Timer(const char* name) : name_{name}
+        {
+            start_ = std::chrono::high_resolution_clock::now();
+            started_ = true;
+        }
 
-#define START_CHRONO(M)                                                                            \
-    {                                                                                              \
-        const char* msg = M;                                                                       \
-        auto start = std::chrono::steady_clock::now();
+        ~Timer() { stop(); }
 
-#define STOP_CHRONO()                                                                              \
-    auto stop = std::chrono::steady_clock::now();                                                  \
-    const double t = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();  \
-    utils::Log::info("Timing", "%s took : %f ms\n", msg, t);                                       \
-    }
+        inline void start(const char* name)
+        {
+            stop();
+            name_ = std::string(name);
+            start_ = std::chrono::high_resolution_clock::now();
+            started_ = true;
+        }
+
+        inline void stop()
+        {
+            if(started_)
+            {
+                stop_ = std::chrono::high_resolution_clock::now();
+                started_ = false;
+                const auto duration
+                    = std::chrono::duration_cast<std::chrono::microseconds>(stop_ - start_);
+                utils::Log::time(
+                    "Timer", "%s took %f [ms]", name_.c_str(), double(duration.count()) / 1000.0);
+            }
+        }
+
+      private:
+        bool started_ = false;
+        std::string name_;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+        std::chrono::time_point<std::chrono::high_resolution_clock> stop_;
+    };
+} // namespace utils
+} // namespace fusion

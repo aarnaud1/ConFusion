@@ -17,10 +17,10 @@
 
 #pragma once
 
-#include "utils/Ptr.hpp"
-#include "utils/Img.hpp"
-#include "imgproc/formats.hpp"
 #include "imgproc/Image2D.hpp"
+#include "imgproc/formats.hpp"
+#include "utils/Img.hpp"
+#include "utils/Ptr.hpp"
 
 #include <type_traits>
 
