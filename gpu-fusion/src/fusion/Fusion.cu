@@ -304,10 +304,6 @@ namespace gpu
                             = (math::Vec3f::Dot(poseInFrame - depth * ray, ray) < 0.0f) ? 1.0f
                                                                                         : -1.0f;
                         const float dist = signVal * math::Vec3f::Len(depth * ray - poseInFrame);
-                        // if(abs(dist) > tau)
-                        // {
-                        //     continue; // TODO : add w threshold in export
-                        // }
                         const float val = dist / tau;
                         const float w = std::max(expf(-val * val), 0.0001f);
                         const float prevW = __ldg(weightPtr + idx);
@@ -625,12 +621,8 @@ void Fusion::prepareFrames(
     const size_t batchOffset,
     const size_t batchSize)
 {
-    utils::Log::info(
-        "Fusion",
-        "Preparing frames %zu - %zu over %zu",
-        batchOffset,
-        batchOffset + batchSize,
-        frames.size());
+    utils::Log::message(
+        "Preparing frames %zu - %zu over %zu", batchOffset, batchOffset + batchSize, frames.size());
 
     for(size_t batchId = 0; batchId < batchSize; ++batchId)
     {
@@ -713,6 +705,11 @@ void Fusion::performIntegration(
     const size_t batchOffset,
     const size_t batchSize)
 {
+    utils::Log::message(
+        "Integrating frames %zu - %zu over %zu",
+        batchOffset,
+        batchOffset + batchSize,
+        poses.size());
     utils::Timer timer("fusion::performIntegration()");
     for(size_t batchId = 0; batchId < batchSize; ++batchId)
     {

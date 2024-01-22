@@ -59,7 +59,7 @@ class Fusion final
     void exportFrame(const CpuFrameType& frame, const math::Mat4f& m, const char* filename);
 
   private:
-    static constexpr bool renderFrames = true;
+    static constexpr bool renderFrames = false;
 
     FusionParameters params_;
 

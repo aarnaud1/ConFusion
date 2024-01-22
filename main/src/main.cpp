@@ -16,7 +16,6 @@
  */
 
 #include <DepthMapDataset.hpp>
-#include <Parameters.hpp>
 #include <chrono>
 #include <common.hpp>
 #include <cstdio>

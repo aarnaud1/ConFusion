@@ -15,11 +15,12 @@
 
 STD := c++17
 OPT_LVL := -O3
+DEFINES := -DLOG_LEVEL=2
 
 CXX := g++ -g
 NVCC := nvcc -std=$(STD) -ccbin=$(CXX)
 
-HOST_CFLAGS := -std=$(STD) -Wall -Wextra -ffast-math -fopenmp $(OPT_LVL)
+HOST_CFLAGS := -std=$(STD) -Wall -Wextra -ffast-math -fopenmp $(OPT_LVL) $(DEFINES)
 HOST_LFLAGS := -Wl\,-rpath\,./GL/lib -lglfw -lgflags \
 								-L./output/lib -lgpuFusion \
 								-lopencv_imgcodecs -lopencv_core -lopencv_imgproc \
