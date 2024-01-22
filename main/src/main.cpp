@@ -31,8 +31,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-using Vec3 = fusion::math::Vec3<float>;
-using Vec4 = fusion::math::Vec4<float>;
+using Vec3 = cfs::math::Vec3<float>;
+using Vec4 = cfs::math::Vec4<float>;
 
 DEFINE_string(dataset, "", "Dataset path");
 DEFINE_uint64(frameCount, 0, "Number of frames to load");
@@ -48,19 +48,19 @@ int main(int argc, char** argv)
     tests::DepthMapDataset dataset(FLAGS_dataset, FLAGS_frameCount);
     static constexpr float depthScale = 5000.0f;
 
-    std::vector<fusion::CpuFrameType> frames;
+    std::vector<cfs::CpuFrameType> frames;
     frames.resize(dataset.size());
 
-    std::vector<fusion::math::Mat4f> poses;
+    std::vector<cfs::math::Mat4f> poses;
     poses.resize(dataset.size());
 
     size_t maxWidth = 0;
     size_t maxHeight = 0;
-    fusion::utils::Log::message("Reading %zu frames from the input dataset\n", dataset.size());
+    cfs::utils::Log::message("Reading %zu frames from the input dataset\n", dataset.size());
 #pragma omp parallel for
     for(size_t idx = 0; idx < dataset.size(); idx += 10)
     {
-        fusion::utils::Log::message(
+        cfs::utils::Log::message(
             "Loading frames %zu to %zu", idx, std::min(idx + 10, dataset.size() - 1));
         for(size_t id = 0; (id < 10) && (idx + id < dataset.size()); ++id)
         {
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
             const auto height = colorInfo.height;
             if(depthInfo.width != colorInfo.width || depthInfo.height != colorInfo.height)
             {
-                fusion::utils::Log::warning("Dataset reading", "Depth and color sizes mismatch\n");
+                cfs::utils::Log::warning("Dataset reading", "Depth and color sizes mismatch\n");
                 continue;
             }
             maxWidth = std::max(width, maxWidth);
@@ -90,16 +90,16 @@ int main(int argc, char** argv)
                 3 * width * height * sizeof(uint8_t));
         }
     }
-    fusion::utils::Log::message("Reading frames : done");
+    cfs::utils::Log::message("Reading frames : done");
 
-    fusion::utils::Log::message("Running fusion...");
+    cfs::utils::Log::message("Running fusion...");
     try
     {
         const float maxDepth = static_cast<float>(FLAGS_maxDepth);
         const float voxelRes = static_cast<float>(FLAGS_voxelRes);
         const float tau = static_cast<float>(FLAGS_tau);
 
-        fusion::FusionParameters params;
+        cfs::FusionParameters params;
         params.voxelRes = voxelRes;
         params.tau = tau;
         params.near = 0.0f;
@@ -108,13 +108,13 @@ int main(int argc, char** argv)
         params.maxWidth = maxWidth;
         params.maxHeight = maxHeight;
         params.intrinsics = dataset.intrinsics().GetRotation();
-        params.camToSensor = fusion::math::Mat4f{
-            fusion::math::Vec4f{0.0f, -1.0f, 0.0f, 0.0f},
-            fusion::math::Vec4f{1.0f, 0.0f, 0.0f, 0.0f},
-            fusion::math::Vec4f{0.0f, 0.0f, -1.0f, 0.0f},
-            fusion::math::Vec4f{0.0f, 0.0f, 0.0f, 1.0f}};
+        params.camToSensor = cfs::math::Mat4f{
+            cfs::math::Vec4f{0.0f, -1.0f, 0.0f, 0.0f},
+            cfs::math::Vec4f{1.0f, 0.0f, 0.0f, 0.0f},
+            cfs::math::Vec4f{0.0f, 0.0f, -1.0f, 0.0f},
+            cfs::math::Vec4f{0.0f, 0.0f, 0.0f, 1.0f}};
 
-        fusion::Fusion fusion{params};
+        cfs::Fusion fusion{params};
         fusion.integrateFrames(frames, poses);
         fusion.exportFinalMesh("output.ply");
 
@@ -127,16 +127,16 @@ int main(int argc, char** argv)
         //     fusion.exportFrame(frames[frameId], poses[frameId], filename);
         //     snprintf(filename, 512, "frame_untransformed_%d.ply", frameCount);
         //     fusion.exportFrame(
-        //         frames[frameId], fusion::math::Mat4f::Inverse(params.camToSensor), filename);
+        //         frames[frameId], cfs::math::Mat4f::Inverse(params.camToSensor), filename);
         //     frameCount++;
         // }
     }
     catch(const std::exception& e)
     {
-        fusion::utils::Log::critical("Running fusion", "%s", e.what());
+        cfs::utils::Log::critical("Running fusion", "%s", e.what());
         return EXIT_FAILURE;
     }
-    fusion::utils::Log::message("Running fusion : done");
+    cfs::utils::Log::message("Running fusion : done");
 
     return EXIT_SUCCESS;
 }

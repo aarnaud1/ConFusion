@@ -57,8 +57,8 @@ class DepthMapDataset
 
   private:
     size_t size_;
-    fusion::math::Mat4f intrinsics_;
-    std::vector<fusion::math::Mat4f> poses_;
+    cfs::math::Mat4f intrinsics_;
+    std::vector<cfs::math::Mat4f> poses_;
     std::vector<std::unique_ptr<uint16_t>> depthImages_;
     std::vector<std::unique_ptr<uint8_t>> colorImages_;
     std::vector<FrameInfo> depthFramesInfo_;

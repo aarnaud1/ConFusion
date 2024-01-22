@@ -72,7 +72,7 @@ DepthMapDataset::DepthMapDataset(const std::string& dir, const size_t n) : size_
 
 void DepthMapDataset::readIntrinsics(const std::string& filename)
 {
-    auto M = fusion::math::Mat4f::Identity();
+    auto M = cfs::math::Mat4f::Identity();
     std::string line;
     std::ifstream ifs(filename.c_str());
     if(!ifs)
@@ -139,8 +139,8 @@ void DepthMapDataset::readColor(const std::string& filename)
 
 void DepthMapDataset::readPose(const std::string& filename)
 {
-    fusion::math::Vec3f T;
-    fusion::math::Vec4f Q;
+    cfs::math::Vec3f T;
+    cfs::math::Vec4f Q;
     std::string line;
     std::ifstream ifs(filename.c_str());
     if(!ifs)
@@ -153,12 +153,12 @@ void DepthMapDataset::readPose(const std::string& filename)
     std::istringstream iss(line);
     iss >> T.x >> T.y >> T.z >> Q.x >> Q.y >> Q.z >> Q.w;
 
-    const auto M = fusion::math::Mat4f::Affine(fusion::math::Vec4f{Q.x, Q.y, Q.z, -Q.w}, T);
-    const fusion::math::Mat4f axis{
-        fusion::math::Vec4f(1.0f, 0.0f, 0.0f, 0.0f),
-        fusion::math::Vec4f(0.0f, 1.0f, 0.0f, 0.0f),
-        fusion::math::Vec4f(0.0f, 0.0f, -1.0f, 0.0f),
-        fusion::math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f)};
+    const auto M = cfs::math::Mat4f::Affine(cfs::math::Vec4f{Q.x, Q.y, Q.z, -Q.w}, T);
+    const cfs::math::Mat4f axis{
+        cfs::math::Vec4f(1.0f, 0.0f, 0.0f, 0.0f),
+        cfs::math::Vec4f(0.0f, 1.0f, 0.0f, 0.0f),
+        cfs::math::Vec4f(0.0f, 0.0f, -1.0f, 0.0f),
+        cfs::math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f)};
     poses_.emplace_back(axis * M);
 }
 

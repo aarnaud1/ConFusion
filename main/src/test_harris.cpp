@@ -56,14 +56,14 @@ int main(int argc, char** argv)
     const size_t width = img.cols;
     const size_t height = img.rows;
 
-    auto inputImg = fusion::Image2D<fusion::ImageFormat::R, float>{width, height};
-    auto outputImg = fusion::Image2D<fusion::ImageFormat::R, float>{width, height};
-    auto gradientsCpu = fusion::CpuPtr<fusion::math::Vec2f, true>{width * height};
-    auto edgesCpu = fusion::CpuPtr<float, true>{width * height};
-    auto harrisImg = fusion::Buffer2D<float>{width, height};
+    auto inputImg = cfs::Image2D<cfs::ImageFormat::R, float>{width, height};
+    auto outputImg = cfs::Image2D<cfs::ImageFormat::R, float>{width, height};
+    auto gradientsCpu = cfs::CpuPtr<cfs::math::Vec2f, true>{width * height};
+    auto edgesCpu = cfs::CpuPtr<float, true>{width * height};
+    auto harrisImg = cfs::Buffer2D<float>{width, height};
 
-    fusion::Gauss2D<fusion::ImageFormat::R, float> gauss(0.25, 2);
-    fusion::Harris2D<float> harris(float(FLAGS_k), width, height);
+    cfs::Gauss2D<cfs::ImageFormat::R, float> gauss(0.25, 2);
+    cfs::Harris2D<float> harris(float(FLAGS_k), width, height);
 
     std::vector<uchar> outputData;
     outputData.resize(width * height);
@@ -85,16 +85,16 @@ int main(int argc, char** argv)
     harrisPoints.resize(width * height);
     cv::Mat harrisOutput(height, width, CV_8UC1, harrisPoints.data());
 
-    fusion::CpuPtr<float, true> outputImgData{width * height};
-    fusion::CpuPtr<float, true> responsesImgData{width * height};
-    fusion::CpuPtr<float, true> harrisImgData{width * height};
+    cfs::CpuPtr<float, true> outputImgData{width * height};
+    cfs::CpuPtr<float, true> responsesImgData{width * height};
+    cfs::CpuPtr<float, true> harrisImgData{width * height};
 
     try
     {
         cudaStream_t stream;
         gpuErrcheck(cudaStreamCreate(&stream));
 
-        fusion::CpuPtr<float, true> imgData{width * height};
+        cfs::CpuPtr<float, true> imgData{width * height};
         for(size_t i = 0; i < width * height; ++i)
         {
             imgData[i] = float(img.data[i]) / 255.0f;
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
         inputImg.upload(imgData, stream);
         gauss.filter(inputImg, outputImg, stream);
         harris.compute(outputImg, stream);
-        fusion::performNmsSuppression(harris.responses(), harrisImg, stream);
+        cfs::performNmsSuppression(harris.responses(), harrisImg, stream);
 
         // Download GPU data
         outputImg.download(outputImgData, stream);

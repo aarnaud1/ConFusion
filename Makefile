@@ -36,16 +36,15 @@ NVCC_FLAGS := $(OPT_LVL) --machine=64 --use_fast_math --restrict\
 							-gencode=arch=compute_75,code=compute_75 \
 							-Xcompiler "$(HOST_CFLAGS)" \
 							-Xcudafe --diag_suppress=declared_but_not_referenced
-IFLAGS := 	-I./gpu-fusion/include \
+IFLAGS := 	-I./cfs/include \
 			-I./main/include \
-			-I./GL/include \
 			-I/usr/include/opencv4 \
 			-I/usr/local/cuda/include
 LFLAGS := 	-Xcompiler "$(HOST_LFLAGS)" \
 			-lcuda -lcudart -lcudadevrt -lstdc++ 
 
-CU_OBJ_FILES := $(patsubst gpu-fusion/src/%.cu,output/obj/%.cu.o,$(wildcard gpu-fusion/src/**/*.cu))
-OBJ_FILES := $(patsubst gpu-fusion/src/%.cpp,output/obj/%.o,$(wildcard gpu-fusion/src/**/*.cpp))
+CU_OBJ_FILES := $(patsubst cfs/src/%.cu,output/obj/%.cu.o,$(wildcard cfs/src/**/*.cu))
+OBJ_FILES := $(patsubst cfs/src/%.cpp,output/obj/%.o,$(wildcard cfs/src/**/*.cpp))
 MAIN_SRC_FILES := main/src/DepthMapDataset.cpp
 
 MODULE := output/lib/libgpuFusion.so
@@ -65,10 +64,10 @@ deps:
 	$(shell mkdir -p output/obj/utils)
 	$(shell mkdir -p output/lib/)
 
-output/obj/%.cu.o: gpu-fusion/src/%.cu
+output/obj/%.cu.o: cfs/src/%.cu
 	$(NVCC) $(NVCC_FLAGS) -Xcompiler '-fPIC' $(IFLAGS) -dc $< -o $@
 
-output/obj/%.o: gpu-fusion/src/%.cpp
+output/obj/%.o: cfs/src/%.cpp
 	$(CXX) $(HOST_CFLAGS) --pedantic -c -fPIC $(IFLAGS) -o $@ $<
 
 $(MODULE): $(CU_OBJ_FILES) $(OBJ_FILES)

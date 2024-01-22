@@ -42,15 +42,15 @@ int main(int argc, char** argv)
     const size_t width = img.cols;
     const size_t height = img.rows;
 
-    auto inputImg = fusion::Image2D<fusion::ImageFormat::R, float>{width, height};
-    auto outputImg = fusion::Image2D<fusion::ImageFormat::R, float>{width, height};
-    auto gradientsImg = fusion::Image2D<fusion::ImageFormat::R, float>{width, height};
-    auto edgesImg = fusion::Image2D<fusion::ImageFormat::R, uint8_t>{width, height};
+    auto inputImg = cfs::Image2D<cfs::ImageFormat::R, float>{width, height};
+    auto outputImg = cfs::Image2D<cfs::ImageFormat::R, float>{width, height};
+    auto gradientsImg = cfs::Image2D<cfs::ImageFormat::R, float>{width, height};
+    auto edgesImg = cfs::Image2D<cfs::ImageFormat::R, uint8_t>{width, height};
 
-    fusion::Gauss2D<fusion::ImageFormat::R, float> gauss(0.7, 3);
+    cfs::Gauss2D<cfs::ImageFormat::R, float> gauss(0.7, 3);
 
     const double maxThr = 0.005;
-    fusion::Canny2D<float> canny(0.5 * maxThr, maxThr);
+    cfs::Canny2D<float> canny(0.5 * maxThr, maxThr);
 
     std::vector<uchar> outputData;
     outputData.resize(width * height);
@@ -68,10 +68,10 @@ int main(int argc, char** argv)
     {
         cudaStream_t stream;
         gpuErrcheck(cudaStreamCreate(&stream));
-        fusion::CpuPtr<float, true> imgData{width * height};
-        fusion::CpuPtr<float, true> outputImgData{width * height};
-        fusion::CpuPtr<uint8_t, true> edgesImgData{width * height};
-        fusion::CpuPtr<float, true> gradientsImgData{width * height};
+        cfs::CpuPtr<float, true> imgData{width * height};
+        cfs::CpuPtr<float, true> outputImgData{width * height};
+        cfs::CpuPtr<uint8_t, true> edgesImgData{width * height};
+        cfs::CpuPtr<float, true> gradientsImgData{width * height};
 
         for(size_t i = 0; i < width * height; ++i)
         {
