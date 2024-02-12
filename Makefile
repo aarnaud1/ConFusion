@@ -15,7 +15,7 @@
 
 STD := c++17
 OPT_LVL := -O3
-DEFINES := -DLOG_LEVEL=0
+DEFINES := -DLOG_LEVEL=2
 
 CXX := g++ -g
 NVCC := nvcc -std=$(STD) -ccbin=$(CXX)
