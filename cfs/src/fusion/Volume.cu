@@ -226,7 +226,9 @@ bool Volume::addBlock(const math::Vec3i &blockId)
     const bool allocated = find(blockId);
     if(!allocated)
     {
-        voxelBlocks_[blockId] = std::make_unique<VoxelBlock>(params_.voxelRes, 0);
+        // voxelBlocks_[blockId] = std::make_unique<VoxelBlock>(params_.voxelRes, 0);
+        auto block = blockAllocator_.createBlock(params_.voxelRes, 0);
+        voxelBlocks_[blockId] = std::move(block);
         memIds_[blockId] = -1;
         return true;
     }
@@ -242,8 +244,9 @@ size_t Volume::addBlocks(const std::vector<math::Vec3i> &blockIds)
         const bool allocated = find(blockId);
         if(!allocated)
         {
-            auto blockPtr = std::make_unique<VoxelBlock>(params_.voxelRes, 0);
-            voxelBlocks_[blockId] = std::move(blockPtr);
+            // auto blockPtr = std::make_unique<VoxelBlock>(params_.voxelRes, 0);
+            auto block = blockAllocator_.createBlock(params_.voxelRes, 0);
+            voxelBlocks_[blockId] = std::move(block);
             memIds_[blockId] = -1;
             ret++;
         }
@@ -328,10 +331,10 @@ void Volume::exportMesh(const char *filename)
             float *__restrict__ colorsPtr = reinterpret_cast<float *>(tmpColors.data());
             float *__restrict__ normalsPtr = reinterpret_cast<float *>(tmpNormals.data());
 
-            const float *__restrict__ tsdf = voxelBlocks_[blockId]->sdf().data();
-            const float *__restrict__ weights = voxelBlocks_[blockId]->weights().data();
-            const float *__restrict__ rgb = (float *) voxelBlocks_[blockId]->colors().data();
-            const float *__restrict__ grad = (float *) voxelBlocks_[blockId]->gradients().data();
+            const float *__restrict__ tsdf = voxelBlocks_[blockId].sdf();
+            const float *__restrict__ weights = voxelBlocks_[blockId].weights();
+            const float *__restrict__ rgb = (float *) voxelBlocks_[blockId].colors();
+            const float *__restrict__ grad = (float *) voxelBlocks_[blockId].gradients();
 
             float *xx = nullptr;
             float *yy = nullptr;
@@ -367,58 +370,58 @@ void Volume::exportMesh(const char *filename)
 
             if(voxelBlocks_.find(bxx) != voxelBlocks_.end())
             {
-                xx = voxelBlocks_[bxx]->sdf().data();
-                wxx = voxelBlocks_[bxx]->weights().data();
-                cxx = (float *) voxelBlocks_[bxx]->colors().data();
-                gxx = (float *) voxelBlocks_[bxx]->gradients().data();
+                xx = voxelBlocks_[bxx].sdf();
+                wxx = voxelBlocks_[bxx].weights();
+                cxx = (float *) voxelBlocks_[bxx].colors();
+                gxx = (float *) voxelBlocks_[bxx].gradients();
             }
 
             if(voxelBlocks_.find(byy) != voxelBlocks_.end())
             {
-                yy = voxelBlocks_[byy]->sdf().data();
-                wyy = voxelBlocks_[byy]->weights().data();
-                cyy = (float *) voxelBlocks_[byy]->colors().data();
-                gyy = (float *) voxelBlocks_[byy]->gradients().data();
+                yy = voxelBlocks_[byy].sdf();
+                wyy = voxelBlocks_[byy].weights();
+                cyy = (float *) voxelBlocks_[byy].colors();
+                gyy = (float *) voxelBlocks_[byy].gradients();
             }
 
             if(voxelBlocks_.find(bzz) != voxelBlocks_.end())
             {
-                zz = voxelBlocks_[bzz]->sdf().data();
-                wzz = voxelBlocks_[bzz]->weights().data();
-                czz = (float *) voxelBlocks_[bzz]->colors().data();
-                gzz = (float *) voxelBlocks_[bzz]->gradients().data();
+                zz = voxelBlocks_[bzz].sdf();
+                wzz = voxelBlocks_[bzz].weights();
+                czz = (float *) voxelBlocks_[bzz].colors();
+                gzz = (float *) voxelBlocks_[bzz].gradients();
             }
 
             if(voxelBlocks_.find(bxy) != voxelBlocks_.end())
             {
-                xy = voxelBlocks_[bxy]->sdf().data();
-                wxy = voxelBlocks_[bxy]->weights().data();
-                cxy = (float *) voxelBlocks_[bxy]->colors().data();
-                gxy = (float *) voxelBlocks_[bxy]->gradients().data();
+                xy = voxelBlocks_[bxy].sdf();
+                wxy = voxelBlocks_[bxy].weights();
+                cxy = (float *) voxelBlocks_[bxy].colors();
+                gxy = (float *) voxelBlocks_[bxy].gradients();
             }
 
             if(voxelBlocks_.find(bxz) != voxelBlocks_.end())
             {
-                xz = voxelBlocks_[bxz]->sdf().data();
-                wxz = voxelBlocks_[bxz]->weights().data();
-                cxz = (float *) voxelBlocks_[bxz]->colors().data();
-                gxz = (float *) voxelBlocks_[bxz]->gradients().data();
+                xz = voxelBlocks_[bxz].sdf();
+                wxz = voxelBlocks_[bxz].weights();
+                cxz = (float *) voxelBlocks_[bxz].colors();
+                gxz = (float *) voxelBlocks_[bxz].gradients();
             }
 
             if(voxelBlocks_.find(byz) != voxelBlocks_.end())
             {
-                yz = voxelBlocks_[byz]->sdf().data();
-                wyz = voxelBlocks_[byz]->weights().data();
-                cyz = (float *) voxelBlocks_[byz]->colors().data();
-                gyz = (float *) voxelBlocks_[byz]->gradients().data();
+                yz = voxelBlocks_[byz].sdf();
+                wyz = voxelBlocks_[byz].weights();
+                cyz = (float *) voxelBlocks_[byz].colors();
+                gyz = (float *) voxelBlocks_[byz].gradients();
             }
 
             if(voxelBlocks_.find(bxyz) != voxelBlocks_.end())
             {
-                xyz = voxelBlocks_[bxyz]->sdf().data();
-                wxyz = voxelBlocks_[bxyz]->weights().data();
-                cxyz = (float *) voxelBlocks_[bxyz]->colors().data();
-                gxyz = (float *) voxelBlocks_[bxyz]->gradients().data();
+                xyz = voxelBlocks_[bxyz].sdf();
+                wxyz = voxelBlocks_[bxyz].weights();
+                cxyz = (float *) voxelBlocks_[bxyz].colors();
+                gxyz = (float *) voxelBlocks_[bxyz].gradients();
             }
 
             triangleCount = mc::extractMesh(
@@ -547,7 +550,7 @@ void Volume::saveBlocks(const std::vector<size_t> &indices, const bool invalidat
         {
             const auto blockId = streamingBlockIdsHost_[tId][id];
             const auto &blockPtr = voxelBlocks_[blockId];
-            if(blockPtr == nullptr)
+            if(blockPtr.sdf() == nullptr)
             {
                 throw std::runtime_error("Trying to save unallocated block");
             }
@@ -562,10 +565,10 @@ void Volume::saveBlocks(const std::vector<size_t> &indices, const bool invalidat
             const auto *__restrict__ gradientsPtrH
                 = streamingGradientsHost_[tId] + id * blockVolume;
 
-            auto *__restrict__ sdfPtr = voxelBlocks_[blockId]->sdf().data();
-            auto *__restrict__ weightsPtr = voxelBlocks_[blockId]->weights().data();
-            auto *__restrict__ colorsPtr = voxelBlocks_[blockId]->colors().data();
-            auto *__restrict__ gradientsPtr = voxelBlocks_[blockId]->gradients().data();
+            auto *__restrict__ sdfPtr = voxelBlocks_[blockId].sdf();
+            auto *__restrict__ weightsPtr = voxelBlocks_[blockId].weights();
+            auto *__restrict__ colorsPtr = voxelBlocks_[blockId].colors();
+            auto *__restrict__ gradientsPtr = voxelBlocks_[blockId].gradients();
 
             if(invalidate)
             {
@@ -602,7 +605,7 @@ void Volume::uploadBlocks(
         {
             const auto blockId = blockIds[id];
             const auto &blockPtr = voxelBlocks_[blockId];
-            if(blockPtr == nullptr)
+            if(blockPtr.sdf() == nullptr)
             {
                 throw std::runtime_error("Trying to load unallocated block");
             }
@@ -616,10 +619,10 @@ void Volume::uploadBlocks(
             auto *__restrict__ colorsPtrH = streamingColorsHost_[tId] + id * blockVolume;
             auto *__restrict__ gradientsPtrH = streamingGradientsHost_[tId] + id * blockVolume;
 
-            const auto *__restrict__ sdfPtr = voxelBlocks_[blockId]->sdf().data();
-            const auto *__restrict__ weightsPtr = voxelBlocks_[blockId]->weights().data();
-            const auto *__restrict__ colorsPtr = voxelBlocks_[blockId]->colors().data();
-            const auto *__restrict__ gradientsPtr = voxelBlocks_[blockId]->gradients().data();
+            const auto *__restrict__ sdfPtr = voxelBlocks_[blockId].sdf();
+            const auto *__restrict__ weightsPtr = voxelBlocks_[blockId].weights();
+            const auto *__restrict__ colorsPtr = voxelBlocks_[blockId].colors();
+            const auto *__restrict__ gradientsPtr = voxelBlocks_[blockId].gradients();
 
             memcpy(sdfPtrH, sdfPtr, blockVolume * sizeof(float));
             memcpy(weightsPtrH, weightsPtr, blockVolume * sizeof(float));

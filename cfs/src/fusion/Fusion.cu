@@ -27,9 +27,9 @@
 #include "../utils/Ptr.inl"
 
 // TODO : move in raycaster
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgcodecs.hpp>
+// #include <opencv2/imgproc.hpp>
+// #include <opencv2/highgui.hpp>
+// #include <opencv2/imgcodecs.hpp>
 
 namespace cfs
 {
@@ -324,6 +324,7 @@ namespace gpu
         }
     }
 
+    /*
     // TODO : move in raytracer
     ATTR_HOST_DEV_INL static int findBlock(
         const math::Vec3i& blockId,
@@ -523,6 +524,7 @@ namespace gpu
             imgSize);
         renderImage<<<utils::div_up(imgRes, threads), threads>>>(raycastedPoints, img, imgSize);
     }
+    */
 } // namespace gpu
 
 // -------------------------------------------------------------------------------------------------
@@ -742,116 +744,121 @@ void Fusion::performIntegration(
 }
 
 void Fusion::raycastFrames(
-    const std::vector<math::Mat4f>& poses, const size_t batchOffset, const size_t batchSize)
+    const std::vector<math::Mat4f>& /*poses*/,
+    const size_t /*batchOffset*/,
+    const size_t /*batchSize*/)
 {
-    static constexpr size_t imgSize = 2048;
+    // Raycaster not debugged
+    throw std::runtime_error("Raycasting disabled for now");
 
-    static constexpr float fov = 45.0f;
-    static constexpr float near = 0.1f;
-    static constexpr float far = 10.0f;
-
-    const float tanFov = std::tan(0.5f * (fov * M_PI) / 180.0f);
-    const math::Vec3f dir(0.0f, 0.0f, -1.0f);
-
-    BlockIdList blockList;
-
-    GpuPtr<math::Vec3f> raycastedPoints{imgSize * imgSize};
-    GpuPtr<uint8_t> image{3 * imgSize * imgSize};
-    std::vector<uint8_t> imgData;
-    imgData.resize(3 * imgSize * imgSize);
-
-    for(size_t batchId = 0; batchId < batchSize; ++batchId)
-    {
-        const size_t frameId = batchOffset + batchId;
-        const auto& pose = poses[frameId];
-
-        math::Vec3f corners[8];
-
-        corners[0] = dir * near + math::Vec3f(-far * tanFov, -far * tanFov, 0.0f);
-        corners[1] = dir * near + math::Vec3f(far * tanFov, -far * tanFov, 0.0f);
-        corners[2] = dir * near + math::Vec3f(-far * tanFov, far * tanFov, 0.0f);
-        corners[3] = dir * near + math::Vec3f(far * tanFov, far * tanFov, 0.0f);
-
-        corners[4] = dir * far + math::Vec3f(-far * tanFov, -far * tanFov, 0.0f);
-        corners[5] = dir * far + math::Vec3f(far * tanFov, -far * tanFov, 0.0f);
-        corners[6] = dir * far + math::Vec3f(-far * tanFov, far * tanFov, 0.0f);
-        corners[7] = dir * far + math::Vec3f(far * tanFov, far * tanFov, 0.0f);
-
-        // Compute all the frustum points
-        corners[0] = pose * params_.camToSensor /*worldToCam*/ * corners[0];
-        corners[1] = pose * params_.camToSensor /*worldToCam*/ * corners[1];
-        corners[2] = pose * params_.camToSensor /*worldToCam*/ * corners[2];
-        corners[3] = pose * params_.camToSensor /*worldToCam*/ * corners[3];
-        corners[4] = pose * params_.camToSensor /*worldToCam*/ * corners[4];
-        corners[5] = pose * params_.camToSensor /*worldToCam*/ * corners[5];
-        corners[6] = pose * params_.camToSensor /*worldToCam*/ * corners[6];
-        corners[7] = pose * params_.camToSensor /*worldToCam*/ * corners[7];
-
-        float minX = std::numeric_limits<float>::max();
-        float minY = std::numeric_limits<float>::max();
-        float minZ = std::numeric_limits<float>::max();
-
-        float maxX = -std::numeric_limits<float>::max();
-        float maxY = -std::numeric_limits<float>::max();
-        float maxZ = -std::numeric_limits<float>::max();
-
-        for(size_t i = 0; i < 8; i++)
-        {
-            minX = std::min(minX, corners[i].x);
-            minY = std::min(minY, corners[i].y);
-            minZ = std::min(minZ, corners[i].z);
-
-            maxX = std::max(maxX, corners[i].x);
-            maxY = std::max(maxY, corners[i].y);
-            maxZ = std::max(maxZ, corners[i].z);
-        }
-
-        const BlockId b0 = utils::getId(math::Vec3f(minX, minY, minZ), params_.voxelRes);
-        const BlockId b1 = utils::getId(math::Vec3f(maxX, maxY, maxZ), params_.voxelRes);
-
-        blockList.clear();
-        for(int i = b0.x; i <= b1.x; i++)
-        {
-            for(int j = b0.y; j <= b1.y; j++)
-            {
-                for(int k = b0.z; k <= b1.z; k++)
-                {
-                    const BlockId id(i, j, k);
-                    blockList.emplace_back(id);
-                }
-            }
-        }
-
-        utils::Log::info("Fusion", "Block list size for frustum : %zu", blockList.size());
-        const auto loadedBlocks = volume_.streamBlocks(blockList, false);
-        const auto headers = volume_.getHeaders(loadedBlocks);
-        utils::Log::info("Fusion", "Allocated blocks in frustum : %zu", headers.size());
-
-        gpu::renderVolume<<<1, 1, 0, mainStream_>>>(
-            image,
-            raycastedPoints,
-            pose * params_.camToSensor,
-            headers_,
-            volume_.blockPool(),
-            volume_.blockIdMap(),
-            volume_.memIdMap(),
-            volume_.blockIdOffsets(),
-            params_.voxelRes,
-            0.1f,
-            10.0f,
-            loadedBlocks.size(),
-            volume_.getHashSize(),
-            imgSize);
-        cudaDeviceSynchronize();
-        image.downloadTo(imgData.data(), 3 * imgSize * imgSize, mainStream_);
-        cudaDeviceSynchronize();
-
-        cv::Mat outputImage(imgSize, imgSize, CV_8UC3, imgData.data());
-        char imgName[512];
-        static int imgCount = 0;
-        snprintf(imgName, 512, "raycasted_%d.png", imgCount++);
-        cv::imwrite(imgName, outputImage);
-    }
+    // static constexpr size_t imgSize = 2048;
+    //
+    // static constexpr float fov = 45.0f;
+    // static constexpr float near = 0.1f;
+    // static constexpr float far = 10.0f;
+    //
+    // const float tanFov = std::tan(0.5f * (fov * M_PI) / 180.0f);
+    // const math::Vec3f dir(0.0f, 0.0f, -1.0f);
+    //
+    // BlockIdList blockList;
+    //
+    // GpuPtr<math::Vec3f> raycastedPoints{imgSize * imgSize};
+    // GpuPtr<uint8_t> image{3 * imgSize * imgSize};
+    // std::vector<uint8_t> imgData;
+    // imgData.resize(3 * imgSize * imgSize);
+    //
+    // for(size_t batchId = 0; batchId < batchSize; ++batchId)
+    // {
+    //     const size_t frameId = batchOffset + batchId;
+    //     const auto& pose = poses[frameId];
+    //
+    //     math::Vec3f corners[8];
+    //
+    //     corners[0] = dir * near + math::Vec3f(-far * tanFov, -far * tanFov, 0.0f);
+    //     corners[1] = dir * near + math::Vec3f(far * tanFov, -far * tanFov, 0.0f);
+    //     corners[2] = dir * near + math::Vec3f(-far * tanFov, far * tanFov, 0.0f);
+    //     corners[3] = dir * near + math::Vec3f(far * tanFov, far * tanFov, 0.0f);
+    //
+    //     corners[4] = dir * far + math::Vec3f(-far * tanFov, -far * tanFov, 0.0f);
+    //     corners[5] = dir * far + math::Vec3f(far * tanFov, -far * tanFov, 0.0f);
+    //     corners[6] = dir * far + math::Vec3f(-far * tanFov, far * tanFov, 0.0f);
+    //     corners[7] = dir * far + math::Vec3f(far * tanFov, far * tanFov, 0.0f);
+    //
+    //     // Compute all the frustum points
+    //     corners[0] = pose * params_.camToSensor /*worldToCam*/ * corners[0];
+    //     corners[1] = pose * params_.camToSensor /*worldToCam*/ * corners[1];
+    //     corners[2] = pose * params_.camToSensor /*worldToCam*/ * corners[2];
+    //     corners[3] = pose * params_.camToSensor /*worldToCam*/ * corners[3];
+    //     corners[4] = pose * params_.camToSensor /*worldToCam*/ * corners[4];
+    //     corners[5] = pose * params_.camToSensor /*worldToCam*/ * corners[5];
+    //     corners[6] = pose * params_.camToSensor /*worldToCam*/ * corners[6];
+    //     corners[7] = pose * params_.camToSensor /*worldToCam*/ * corners[7];
+    //
+    //     float minX = std::numeric_limits<float>::max();
+    //     float minY = std::numeric_limits<float>::max();
+    //     float minZ = std::numeric_limits<float>::max();
+    //
+    //     float maxX = -std::numeric_limits<float>::max();
+    //     float maxY = -std::numeric_limits<float>::max();
+    //     float maxZ = -std::numeric_limits<float>::max();
+    //
+    //     for(size_t i = 0; i < 8; i++)
+    //     {
+    //         minX = std::min(minX, corners[i].x);
+    //         minY = std::min(minY, corners[i].y);
+    //         minZ = std::min(minZ, corners[i].z);
+    //
+    //         maxX = std::max(maxX, corners[i].x);
+    //         maxY = std::max(maxY, corners[i].y);
+    //         maxZ = std::max(maxZ, corners[i].z);
+    //     }
+    //
+    //     const BlockId b0 = utils::getId(math::Vec3f(minX, minY, minZ), params_.voxelRes);
+    //     const BlockId b1 = utils::getId(math::Vec3f(maxX, maxY, maxZ), params_.voxelRes);
+    //
+    //     blockList.clear();
+    //     for(int i = b0.x; i <= b1.x; i++)
+    //     {
+    //         for(int j = b0.y; j <= b1.y; j++)
+    //         {
+    //             for(int k = b0.z; k <= b1.z; k++)
+    //             {
+    //                 const BlockId id(i, j, k);
+    //                 blockList.emplace_back(id);
+    //             }
+    //         }
+    //     }
+    //
+    //     utils::Log::info("Fusion", "Block list size for frustum : %zu", blockList.size());
+    //     const auto loadedBlocks = volume_.streamBlocks(blockList, false);
+    //     const auto headers = volume_.getHeaders(loadedBlocks);
+    //     utils::Log::info("Fusion", "Allocated blocks in frustum : %zu", headers.size());
+    //
+    //     gpu::renderVolume<<<1, 1, 0, mainStream_>>>(
+    //         image,
+    //         raycastedPoints,
+    //         pose * params_.camToSensor,
+    //         headers_,
+    //         volume_.blockPool(),
+    //         volume_.blockIdMap(),
+    //         volume_.memIdMap(),
+    //         volume_.blockIdOffsets(),
+    //         params_.voxelRes,
+    //         0.1f,
+    //         10.0f,
+    //         loadedBlocks.size(),
+    //         volume_.getHashSize(),
+    //         imgSize);
+    //     cudaDeviceSynchronize();
+    //     image.downloadTo(imgData.data(), 3 * imgSize * imgSize, mainStream_);
+    //     cudaDeviceSynchronize();
+    //
+    //     cv::Mat outputImage(imgSize, imgSize, CV_8UC3, imgData.data());
+    //     char imgName[512];
+    //     static int imgCount = 0;
+    //     snprintf(imgName, 512, "raycasted_%d.png", imgCount++);
+    //     cv::imwrite(imgName, outputImage);
+    // }
 }
 
 void Fusion::allocateMemory(const size_t width, const size_t height)

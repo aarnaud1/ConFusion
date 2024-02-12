@@ -101,14 +101,22 @@ class BasePtr final
     {
         gpuErrcheck(cudaMemcpy(data_, cp.data_, size_ * sizeof(T), cudaMemcpyHostToHost));
     }
-    BasePtr(BasePtr&& cp) noexcept = default;
+    BasePtr(BasePtr&& cp) noexcept
+    {
+        std::swap(this->size_, cp.size_);
+        std::swap(this->data_, cp.data_);
+    }
     BasePtr& operator=(const BasePtr& cp)
     {
         size_ = cp.size_;
         data_ = AllocType::allocate(size_);
         gpuErrcheck(cudaMemcpy(data_, cp.data_, size_ * sizeof(T), cudaMemcpyHostToHost));
     }
-    BasePtr& operator=(BasePtr&& cp) noexcept = default;
+    BasePtr& operator=(BasePtr&& cp) noexcept
+    {
+        std::swap(this->size_, cp.size_);
+        std::swap(this->data_, cp.data_);
+    }
 
     ~BasePtr() { clear(); }
 

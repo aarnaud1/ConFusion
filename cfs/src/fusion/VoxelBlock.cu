@@ -21,19 +21,19 @@
 
 namespace cfs
 {
-VoxelBlock::VoxelBlock(const float voxelSize, const size_t level)
-    : voxelSize_{voxelSize}
-    , level_{level}
-    , sdf_{blockVolume}
-    , weights_{blockVolume}
-    , colors_{blockVolume}
-    , gradients_{blockVolume}
-{
-    std::fill(sdf_.begin(), sdf_.end(), INVALID_TSDF);
-    std::fill(weights_.begin(), weights_.end(), DEFAULT_WEIGHT);
-    std::fill(colors_.begin(), colors_.end(), DEFAULT_COLOR);
-    std::fill(gradients_.begin(), gradients_.end(), DEFAULT_GRADIENT);
-}
+// VoxelBlock::VoxelBlock(const float voxelSize, const size_t level)
+//     : voxelSize_{voxelSize}
+//     , level_{level}
+//     , sdf_{blockVolume}
+//     , weights_{blockVolume}
+//     , colors_{blockVolume}
+//     , gradients_{blockVolume}
+// {
+//     std::fill(sdf_.begin(), sdf_.end(), INVALID_TSDF);
+//     std::fill(weights_.begin(), weights_.end(), DEFAULT_WEIGHT);
+//     std::fill(colors_.begin(), colors_.end(), DEFAULT_COLOR);
+//     std::fill(gradients_.begin(), gradients_.end(), DEFAULT_GRADIENT);
+// }
 
 VoxelBlock::~VoxelBlock() {}
 } // namespace cfs

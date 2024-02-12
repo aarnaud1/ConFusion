@@ -19,10 +19,7 @@
 
 #include "fusion/BlockUtils.hpp"
 #include "math/geometry.hpp"
-#include "utils/Ptr.hpp"
 
-namespace cfs
-{
 #define INVALID_TSDF std::numeric_limits<float>::max()
 #define DEFAULT_WEIGHT 0.0f
 #define DEFAULT_COLOR                                                                              \
@@ -30,6 +27,8 @@ namespace cfs
 #define DEFAULT_GRADIENT                                                                           \
     math::Vec3f { 0.0f, 0.0f, 0.0f }
 
+namespace cfs
+{
 struct BlockHeader
 {
     math::Vec3i blockId;
@@ -44,45 +43,44 @@ struct BlockHeader
 class VoxelBlock
 {
   public:
-    VoxelBlock() = delete;
-    VoxelBlock(const float voxelSize, const size_t level = 0);
-    VoxelBlock(const VoxelBlock&) = default;
+    VoxelBlock() = default;
+    VoxelBlock(const VoxelBlock&) = delete;
     VoxelBlock(VoxelBlock&&) = default;
-    VoxelBlock& operator=(const VoxelBlock&) = default;
+    VoxelBlock& operator=(const VoxelBlock&) = delete;
     VoxelBlock& operator=(VoxelBlock&&) = default;
 
     ~VoxelBlock();
 
-    inline auto& sdf() { return sdf_; }
-    inline const auto& sdf() const { return sdf_; }
+    inline auto* sdf() { return sdf_; }
+    inline const auto* sdf() const { return sdf_; }
 
-    inline auto& weights() { return weights_; }
-    inline const auto& weights() const { return weights_; }
+    inline auto weights() { return weights_; }
+    inline const auto* weights() const { return weights_; }
 
-    inline auto& colors() { return colors_; }
-    inline const auto& colors() const { return colors_; }
+    inline auto* colors() { return colors_; }
+    inline const auto* colors() const { return colors_; }
 
-    inline auto& gradients() { return gradients_; }
-    inline const auto& gradients() const { return gradients_; }
+    inline auto* gradients() { return gradients_; }
+    inline const auto* gradients() const { return gradients_; }
 
     inline auto finestVoxelSize() const { return voxelSize_; }
     inline auto voxelSize() const { return float(1 << level_) * voxelSize_; }
 
     static size_t getMemorySize()
     {
-        return blockVolume * sizeof(decltype(sdf_)::value_type)
-               + blockVolume * sizeof(decltype(weights_)::value_type)
-               + blockVolume * sizeof(decltype(colors_)::value_type)
-               + blockVolume * sizeof(decltype(gradients_)::value_type);
+        return blockVolume * sizeof(float) + blockVolume * sizeof(float)
+               + blockVolume * sizeof(math::Vec3f) + blockVolume * sizeof(math::Vec3f);
     }
 
   private:
-    const float voxelSize_;
-    const size_t level_;
+    friend class BlockAllocator;
 
-    CpuPtr<float, false> sdf_;
-    CpuPtr<float, false> weights_;
-    CpuPtr<math::Vec3f, false> colors_;
-    CpuPtr<math::Vec3f, false> gradients_;
+    float voxelSize_{0.0f};
+    size_t level_{0};
+
+    float* sdf_{nullptr};
+    float* weights_{nullptr};
+    math::Vec3f* colors_{nullptr};
+    math::Vec3f* gradients_{nullptr};
 };
 } // namespace cfs

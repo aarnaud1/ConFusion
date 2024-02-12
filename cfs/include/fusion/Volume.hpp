@@ -21,6 +21,7 @@
 #include "fusion/DepthFrame.hpp"
 #include "fusion/FusionParameters.hpp"
 #include "fusion/VoxelBlock.hpp"
+#include "fusion/BlockAllocator.hpp"
 #include "math/geometry.hpp"
 #include "utils/Ptr.hpp"
 
@@ -30,8 +31,10 @@
 
 namespace cfs
 {
+// TODO : std::unorderes_map is really not a good choicehere, we should consider using some third
+// party hash map library or implement our own block map class.
 typedef std::vector<math::Vec3i> BlockIdList;
-typedef std::unordered_map<math::Vec3i, std::unique_ptr<VoxelBlock>, VolumeHash> BlockMap;
+typedef std::unordered_map<math::Vec3i, VoxelBlock, VolumeHash> BlockMap;
 typedef std::unordered_map<math::Vec3i, int, VolumeHash> BlockMemoryMap;
 typedef std::vector<std::unique_ptr<VoxelBlock>> BlockList;
 
@@ -72,11 +75,11 @@ class Volume
         return voxelBlocks_.find(blockId) != voxelBlocks_.end();
     }
 
-    VoxelBlock& getBlock(const math::Vec3i& blockId) { return *voxelBlocks_.at(blockId); }
+    VoxelBlock& getBlock(const math::Vec3i& blockId) { return voxelBlocks_.at(blockId); }
 
     const VoxelBlock& getBlock(const math::Vec3i& blockId) const
     {
-        return *voxelBlocks_.at(blockId);
+        return voxelBlocks_.at(blockId);
     }
 
     std::vector<BlockHeader> getHeaders(const BlockIdList& blockIds) const;
@@ -123,6 +126,7 @@ class Volume
     BlockMemoryMap memIds_;
 
     BlockCache blockCache_;
+    BlockAllocator blockAllocator_;
 
     // Pool data
     GpuPtr<math::Vec3i> blockIds_;
