@@ -5,6 +5,9 @@
 This repository contains the code to perform a basic 3D resconstruction from a set of depth maps on
 GPU, it is built on Linux using CUDA.
 
+![Output with weights](assets/output0.png)
+![Output with shading](assets/output1.png)
+
 # Usage
 ## Datasets
 
