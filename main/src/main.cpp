@@ -37,7 +37,7 @@ using Vec4 = cfs::math::Vec4<float>;
 DEFINE_string(dataset, "", "Dataset path");
 DEFINE_uint64(frameCount, 0, "Number of frames to load");
 DEFINE_double(maxDepth, 10.0, "Max depth");
-DEFINE_double(voxelRes, 0.1, "Voxel resolution");
+DEFINE_double(voxelRes, 0.01, "Voxel resolution");
 DEFINE_double(tau, 0.1, "Truncation distance (in meters)");
 
 int main(int argc, char** argv)
