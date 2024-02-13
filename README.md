@@ -74,22 +74,21 @@ Here is the llist of parameters to be set :
 
 # Things to do
 
-- **MAJOR** Generate basic geometric primitives for testings
-- **MAJOR** Debug the raycaster
-- **MAJOR** Get rid of the `std::unordered_map` and find a more suitable and performant data 
-structure for voxel blocks
-- Improve data loading or at default interleave loading and reconstruction
-- Add colors and gradients
-- Add multiple levels
-- Implement a basic point cloud registration (test projective and tsdf icp)
-- Implement Marching Cubes on GPU
+- [ ] **Generate basic geometric primitives for testings**
+- [ ] **Debug the raycaster**
+- [ ] **Get rid of the `std::unordered_map` and find a more suitable and performant data structure for voxel blocks**
+- [ ] Improve data loading or at default interleave loading and reconstruction
+- [ ] Add colors and gradients
+- [ ] Add multiple levels
+- [ ] Implement a basic point cloud registration (test projective and tsdf icp)
+- [ ] Implement Marching Cubes on GPU
 
 # References
 
-Newcombe, R. A., Izadi, S., Hilliges, O., Molyneaux, D., Kim, D., Davison, A. J., ... & Fitzgibbon, A. (2011, October). Kinectfusion: Real-time dense surface mapping and tracking. In 2011 10th IEEE international symposium on mixed and augmented reality (pp. 127-136). Ieee.
+- Newcombe, R. A., Izadi, S., Hilliges, O., Molyneaux, D., Kim, D., Davison, A. J., ... & Fitzgibbon, A. (2011, October). Kinectfusion: Real-time dense surface mapping and tracking. In 2011 10th IEEE international symposium on mixed and augmented reality (pp. 127-136). Ieee.
 
-Klingensmith, M., Dryanovski, I., Srinivasa, S. S., & Xiao, J. (2015, July). Chisel: Real Time Large Scale 3D Reconstruction Onboard a Mobile Device using Spatially Hashed Signed Distance Fields. In Robotics: science and systems (Vol. 4, No. 1).
+- Klingensmith, M., Dryanovski, I., Srinivasa, S. S., & Xiao, J. (2015, July). Chisel: Real Time Large Scale 3D Reconstruction Onboard a Mobile Device using Spatially Hashed Signed Distance Fields. In Robotics: science and systems (Vol. 4, No. 1).
 
-Lorensen, W. E., & Cline, H. E. (1998). Marching cubes: A high resolution 3D surface construction algorithm. In Seminal graphics: pioneering efforts that shaped the field (pp. 347-353).
+- Lorensen, W. E., & Cline, H. E. (1998). Marching cubes: A high resolution 3D surface construction algorithm. In Seminal graphics: pioneering efforts that shaped the field (pp. 347-353).
 
-Handa, A., Whelan, T., McDonald, J., & Davison, A. J. (2014, May). A benchmark for RGB-D visual odometry, 3D reconstruction and SLAM. In 2014 IEEE international conference on Robotics and automation (ICRA) (pp. 1524-1531). IEEE.
+- Handa, A., Whelan, T., McDonald, J., & Davison, A. J. (2014, May). A benchmark for RGB-D visual odometry, 3D reconstruction and SLAM. In 2014 IEEE international conference on Robotics and automation (ICRA) (pp. 1524-1531). IEEE.
