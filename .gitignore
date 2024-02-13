@@ -2,5 +2,6 @@
 bin/
 lib/
 obj/
+data/
 *.ply
 *.png
