@@ -4,4 +4,3 @@ lib/
 obj/
 data/
 *.ply
-*.png
