@@ -60,15 +60,15 @@ reconstruction result in `output.ply`.
 THis may take a while to load all the data in memory, then the 3D reconstruction will start.
 
 Here is the llist of parameters to be set :
-    - `--dataset` : dataset path
-    - `--frameCount` : max number of prames to process, set to `0` to process all the frames
+- `--dataset` : dataset path
+- `--frameCount` : max number of frames to process, set to `0` to process all the frames
     (default set to `0`)
-    - `--maxDepth` : max depth value (in meter) used to integrate a frame. This can be used to 
+- `--maxDepth` : max depth value (in meter) used to integrate a frame. This can be used to 
     filter out far depth values whose can produce too inaccurate results (default set to `10`).
-    - `--tau` : truncation distance (in meter) for the 3D reconstruction. It will affect the 
+- `--tau` : truncation distance (in meter) for the 3D reconstruction. It will affect the 
     amount of CPU and GPU memory used. A good value for tau is that it is at least in the order of
     magnitude of the depth incertitude (default set to `0.1`).
-    - `--voxelRes` : spatial resolution for the reconstruction. In general, it doesn't make sense to 
+- `--voxelRes` : spatial resolution for the reconstruction. In general, it doesn't make sense to 
     make it smaller than the scanner resolution, it can have a huge impact on performance and memory 
     used (default set to `0.01`).
 
